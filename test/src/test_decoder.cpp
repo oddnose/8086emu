@@ -36,3 +36,8 @@ TEST(OtherTest, decoder_test_more_movs)
 {
     test_decoder("res/listing_0039_more_movs");
 }
+
+TEST(OtherTest, decoder_test_challenge_movs)
+{
+    test_decoder("res/listing_0040_challenge_movs");
+}
