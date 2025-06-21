@@ -5,13 +5,12 @@
 #include "../src/decoder.h"
     #include <unistd.h>
 #include <limits.h>
-#include <iostream>
 
-/*TEST(OtherTest, decoder_test_single_mov)
+void test_decoder(std::string file_name)
 {
     std::ofstream decoded_file;
     decoded_file.open("decoded_file.asm");
-    decoded_file << decode_asm_file("res/listing_0037_single_register_mov");
+    decoded_file << decode_asm_file(file_name);
     decoded_file.close();
 
     int result = system("nasm decoded_file.asm -o decoded_file");
@@ -19,22 +18,21 @@
         throw std::runtime_error("nasm failed");
     }
 
-    result = system("diff res/listing_0037_single_register_mov decoded_file");
+    result = system(std::string("diff decoded_file " + file_name).c_str());
     ASSERT_TRUE(result == 0);
-}*/
+}
+
+TEST(OtherTest, decoder_test_single_mov)
+{
+    test_decoder("res/listing_0037_single_register_mov");
+}
 
 TEST(OtherTest, decoder_test_many_mov)
 {
-    std::ofstream decoded_file;
-    decoded_file.open("decoded_file.asm");
-    decoded_file << decode_asm_file("res/listing_0038_many_register_mov");
-    decoded_file.close();
+    test_decoder("res/listing_0038_many_register_mov");
+}
 
-    int result = system("nasm decoded_file.asm -o decoded_file");
-    if (result != 0) {
-        throw std::runtime_error("nasm failed");
-    }
-
-    result = system("diff res/listing_0038_many_register_mov decoded_file");
-    ASSERT_TRUE(result == 0);
+TEST(OtherTest, decoder_test_more_movs)
+{
+    test_decoder("res/listing_0039_more_movs");
 }
