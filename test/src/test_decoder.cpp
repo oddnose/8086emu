@@ -10,7 +10,8 @@ void test_decoder(std::string file_name)
 {
     std::ofstream decoded_file;
     decoded_file.open("decoded_file.asm");
-    decoded_file << decode_asm_file(file_name);
+    std::string decoded_str = decode_asm_file(file_name);
+    decoded_file << decoded_str;
     decoded_file.close();
 
     int result = system("nasm decoded_file.asm -o decoded_file");

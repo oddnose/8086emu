@@ -6,6 +6,7 @@ set(SOURCE_FILES
     src/decoder.h
 )
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 enable_testing()
 add_library(8086emu ${SOURCE_FILES})
 
