@@ -42,8 +42,7 @@ TEST(OtherTest, decoder_test_challenge_movs)
     test_decoder("res/listing_0040_challenge_movs");
 }
 
-/*
 TEST(OtherTest, decoder_test_add_sub_cmp_jnz)
 {
     test_decoder("res/listing_0041_add_sub_cmp_jnz_copy");
-}*/
+}

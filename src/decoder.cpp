@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -6,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <bitset>
 
 
 const std::string reg_names_8bit[] = { 
@@ -98,24 +100,31 @@ struct Instruction {
     }
 };
 
-int16_t read_data(std::vector<unsigned char>& data, size_t& offset, bool word)
+int16_t read_data(std::vector<unsigned char>& data, size_t& offset, bool word, bool is_signed)
 {
-    int16_t value = word ? 
-        static_cast<int16_t>(data[offset]) | (static_cast<int16_t>(data[offset + 1]) << 8) :
-        static_cast<int8_t>(data[offset]);
+  int16_t value;
+    if (is_signed) {
+      value = static_cast<int8_t>(data[offset]);
+      offset += 1;
+    }
+    else {
+      value = word ? 
+          static_cast<int16_t>(data[offset]) | (static_cast<int16_t>(data[offset + 1]) << 8) :
+          static_cast<int8_t>(data[offset]);
 
-    offset += (word ? 2 : 1);
+      offset += (word ? 2 : 1);
+    }
     return value;
 }
 
-Operand set_rm_text(std::vector<unsigned char>& data, size_t& offset, char mod, char rm, bool word)
+Operand set_rm_text(std::vector<unsigned char>& data, size_t& offset, char mod, char rm, bool word, bool is_signed)
 {
     Operand rm_operand;
 
     switch (mod) {
         case 0b00: {// Memory Mode (no displacement, except when r/m = 110)
             if (rm == 0b110) { //direct address
-                int16_t value = read_data(data, offset, word);
+                int16_t value = read_data(data, offset, word, is_signed);
 
                 rm_operand.type = Operand_type::Direct_address;
                 rm_operand.value = value;
@@ -130,7 +139,7 @@ Operand set_rm_text(std::vector<unsigned char>& data, size_t& offset, char mod, 
         }
         case 0b01: // Memory Mode, 8-bit displacement follows
         case 0b10: {// Memory Mode, 16-bit displacement follows
-            int16_t displacement = read_data(data, offset, (mod == 0b10));
+            int16_t displacement = read_data(data, offset, (mod == 0b10), false);
             rm_operand.type = Operand_type::Memory;
             rm_operand.value = rm;
             rm_operand.displacement = displacement;
@@ -159,7 +168,7 @@ Instruction reg_or_mem_with_reg_to_either(std::vector<unsigned char>& data, size
     char rm = data[offset] & 0b111;
     offset++;
 
-    Operand rm_operand = set_rm_text(data, offset, mod, rm, word);
+    Operand rm_operand = set_rm_text(data, offset, mod, rm, word, false);
     Operand reg_operand = {.type = Operand_type::Register, .size = (word ? Operand_size::Word : Operand_size::Byte), .value = reg };
 
     Instruction instruction;
@@ -177,7 +186,7 @@ Instruction immediate_to_register(std::vector<unsigned char>& data, size_t& offs
     char reg = data[offset] & 0b111;
     offset++;
 
-    int16_t value = read_data(data, offset, word);
+    int16_t value = read_data(data, offset, word, false);
 
     Instruction instruction;
     instruction.operands[0] = {.type = Operand_type::Register, .size = (word ? Operand_size::Word : Operand_size::Byte), .value = reg};
@@ -187,26 +196,31 @@ Instruction immediate_to_register(std::vector<unsigned char>& data, size_t& offs
     return instruction;
 }
 
-Instruction immediate_to_reg_mem(std::vector<unsigned char>& data, size_t& offset) 
+Instruction immediate_to_reg_mem(std::vector<unsigned char>& data, size_t& offset, bool use_sign_extension) 
 {
+    Instruction instruction;
+
     int offset_start = offset;
     bool word = data[offset] & 0b1; // 0 = move 1 byte, 1 = move 2 bytes
+
+    bool sign_extension = false;
+    if (use_sign_extension) {
+      sign_extension = (data[offset] & 0b10) >> 1; 
+    }
+
     offset++;
 
     char mod = data[offset] >> 6;
 
-    // TODO read out instruction name
-    //char reg = (data[offset] & 0b111000) >> 3;
 
     char rm = data[offset] & 0b111;
     offset++;
 
 
-    Operand rm_operand = set_rm_text(data, offset, mod, rm, word);
-    int16_t value = read_data(data, offset, word);
+    Operand rm_operand = set_rm_text(data, offset, mod, rm, word, sign_extension);
+    int16_t value = read_data(data, offset, word, sign_extension);
     Operand immediate_operand = {.type = Operand_type::Immediate, .size = (word ? Operand_size::Word : Operand_size::Byte), .explicit_size = true, .value = value };
 
-    Instruction instruction;
     instruction.operands[0] = rm_operand;
     instruction.operands[1] = immediate_operand;
     instruction.size = offset - offset_start;
@@ -220,11 +234,11 @@ Instruction memory_or_accumulator_to_either(std::vector<unsigned char>& data, si
   bool word = data[offset] & 0b1; // 0 = move 1 byte, 1 = move 2 bytes
   offset++;
 
-  int16_t value = read_data(data, offset, word);
+  int16_t value = read_data(data, offset, word, false);
 
   Instruction instruction;
   Operand memory_op = {.type = Operand_type::Direct_address, .size = (word ? Operand_size::Word : Operand_size::Byte), .value = value};
-  Operand acc_op = {.type = Operand_type::Register, .size = Operand_size::Word, .value = 0}; // ax register
+  Operand acc_op = {.type = Operand_type::Register, .size = (word ? Operand_size::Word : Operand_size::Byte), .value = 0}; // ax/al register
   instruction.operands[0] = to_memory ? memory_op : acc_op;
   instruction.operands[1] = to_memory ? acc_op : memory_op;
   instruction.size = offset - offset_start;
@@ -232,9 +246,26 @@ Instruction memory_or_accumulator_to_either(std::vector<unsigned char>& data, si
   return instruction;
 }
 
+Instruction immediate_to_accumulator(std::vector<unsigned char>& data, size_t& offset) 
+{
+  int offset_start = offset;
+  bool word = data[offset] & 0b1; // 0 = move 1 byte, 1 = move 2 bytes
+  offset++;
+
+  int16_t value = read_data(data, offset, word, false);
+  Operand immediate_operand = {.type = Operand_type::Immediate, .size = (word ? Operand_size::Word : Operand_size::Byte), .explicit_size = true, .value = value };
+  Operand acc_op = {.type = Operand_type::Register, .size = (word ? Operand_size::Word : Operand_size::Byte), .value = 0}; // ax/al register
+
+  Instruction instruction;
+  instruction.operands[0] = acc_op;
+  instruction.operands[1] = immediate_operand;
+  instruction.size = offset - offset_start;
+
+  return instruction;
+}
+
 std::string decode_asm_file(const std::string& path)
 {
-    std::cout << "oooo";
   std::ifstream asm_file(path, std::ios::binary);
   if (!asm_file) {
     throw std::runtime_error("Failed to open asm file");
@@ -250,28 +281,56 @@ std::string decode_asm_file(const std::string& path)
 
   size_t offset = 0;
   while (offset < data.size()) {
+    std::cout << std::bitset<8>(data[offset]) << std::endl;
     Instruction instruction;
 
     if (data[offset] >> 2 == 0b100010) {
       instruction = reg_or_mem_with_reg_to_either(data, offset);
       instruction.name = "mov";
-
-    } else if (data[offset] >> 4 == 0b1011) { //MOV immediate to register
+    } 
+    else if (data[offset] >> 4 == 0b1011) { //MOV immediate to register
       instruction = immediate_to_register(data, offset);
       instruction.name = "mov";
-
-    } else if (data[offset] >> 1 == 0b1010000) { //MOV memory to accumulator
+    } 
+    else if (data[offset] >> 1 == 0b1010000) { //MOV memory to accumulator
       instruction = memory_or_accumulator_to_either(data, offset, false);
       instruction.name = "mov";
-
-    } else if (data[offset] >> 1 == 0b1010001) { //MOV accumulator to memory
+    } 
+    else if (data[offset] >> 1 == 0b1010001) { //MOV accumulator to memory
       instruction = memory_or_accumulator_to_either(data, offset, true);
       instruction.name = "mov";
-
-    } else if (data[offset] >> 1 == 0b1100011) { //MOV immediate to register/memory
-      instruction = immediate_to_reg_mem(data, offset);
+    } 
+    else if (data[offset] >> 1 == 0b1100011) { //MOV immediate to register/memory
+      instruction = immediate_to_reg_mem(data, offset, false);
       instruction.name = "mov";
     }
+    else if (data[offset] >> 2 == 0b0) { //ADD reg/memory with register to either
+      instruction = reg_or_mem_with_reg_to_either(data, offset);
+      instruction.name = "add";
+    }
+    else if (data[offset] >> 2 == 0b100000) { //ADD immediate to register/memory
+      std::string instruction_name;
+      char instr = (data[offset + 1] & 0b111000) >> 3;
+      switch (instr) {
+        case 0b0:
+          instruction_name = "add";
+          break;
+        case 0b010:
+          instruction_name = "sub";
+          break;
+      }
+      instruction = immediate_to_reg_mem(data, offset, true);
+      instruction.name = instruction_name;
+    }
+    else if (data[offset] >> 1 == 0b0000010) { //ADD immediate to accumulator
+      instruction = immediate_to_accumulator(data, offset);
+      instruction.name = "add";
+    } 
+    else {
+      throw std::runtime_error("unknown instruction");
+    }
+
+    std::cout << instruction.to_string() << "\n" << std::endl;
     output << instruction.to_string();
   }
 
