@@ -21,7 +21,6 @@ void test_decoder(std::string file_name)
     result = system(std::string("diff decoded_file " + file_name).c_str());
     ASSERT_TRUE(result == 0);
 }
-
 TEST(OtherTest, decoder_test_single_mov)
 {
     test_decoder("res/listing_0037_single_register_mov");
@@ -41,3 +40,9 @@ TEST(OtherTest, decoder_test_challenge_movs)
 {
     test_decoder("res/listing_0040_challenge_movs");
 }
+
+/*
+TEST(OtherTest, decoder_test_add_sub_cmp_jnz)
+{
+    test_decoder("res/listing_0041_add_sub_cmp_jnz_copy");
+}*/
