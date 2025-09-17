@@ -315,7 +315,7 @@ std::string decode_asm_file(const std::string& path)
         case 0b0:
           instruction_name = "add";
           break;
-        case 0b010:
+        case 0b101:
           instruction_name = "sub";
           break;
       }
@@ -325,6 +325,14 @@ std::string decode_asm_file(const std::string& path)
     else if (data[offset] >> 1 == 0b0000010) { //ADD immediate to accumulator
       instruction = immediate_to_accumulator(data, offset);
       instruction.name = "add";
+    } 
+    else if (data[offset] >> 2 == 0b001010) { //SUB reg/memory with register to either
+      instruction = reg_or_mem_with_reg_to_either(data, offset);
+      instruction.name = "sub";
+    }
+    else if (data[offset] >> 1 == 0b0010110) { //SUB immediate to accumulator
+      instruction = immediate_to_accumulator(data, offset);
+      instruction.name = "sub";
     } 
     else {
       throw std::runtime_error("unknown instruction");
