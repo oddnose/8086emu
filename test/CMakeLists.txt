@@ -4,6 +4,8 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 set(TEST_FILES 
     ${CMAKE_SOURCE_DIR}/src/decoder.h
     ${CMAKE_SOURCE_DIR}/src/decoder.cpp
+    ${CMAKE_SOURCE_DIR}/src/instruction-table.hpp
+    ${CMAKE_SOURCE_DIR}/src/instruction-table.cpp
     src/test_decoder.cpp
 )
 
