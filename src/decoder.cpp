@@ -170,6 +170,7 @@ std::vector<Instruction> decode_asm_file(const std::string& path)
 						immediate_operand.immediate = wide ? static_cast<int16_t>(value) : static_cast<int8_t>(value);
 						break;
 					case Instruction_bits_usage::Data_if_w:
+						//TODO add check if S bit is 0
 						if (!wide)
 						{
 							byte_read = false;

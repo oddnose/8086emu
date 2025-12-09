@@ -10,6 +10,7 @@
 
 #define D BIT(Direction, 0, 1)
 #define W BIT(Wide, 0, 1)
+#define S BIT(S_Bit, 0, 1)
 
 #define MOD BIT(Mod, 0, 2)
 #define REG BIT(Reg, 0, 3)
@@ -21,6 +22,7 @@
 
 
 std::string mov = "mov";
+std::string add = "add";
 
 std::vector<Instruction_encoding> get_all_instructions()
 {
@@ -44,7 +46,11 @@ std::vector<Instruction_encoding> get_all_instructions()
 	
 	//TODO: OUT
 	
+	// ARITHEMIC
+	
 	// ADD
+	ENCODING(add, "Reg/memory with register to either", BYTE(BIT(Literal, 0b000000, 6), D, W), BYTE(MOD, REG, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+	ENCODING(add, "Immediate to register/memory", BYTE(BIT(Literal, 0b100000, 6), W), BYTE(MOD, BIT(Literal, 0b000, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(0))),
 	};
 	return all_instructions;
 
