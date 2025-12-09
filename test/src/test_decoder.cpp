@@ -28,6 +28,9 @@ TEST(OtherTest, decoder_test_single_mov)
 TEST(OtherTest, decoder_test_many_mov)
 {
   std::vector<Instruction> decoded_instructions = decode_asm_file("res/listing_0038_many_register_mov");
+	for (auto inst : decoded_instructions) {
+		inst.print_debug();
+	}
 	ASSERT_EQ(decoded_instructions.size(), 11); 
 
 	Instruction decoded;
@@ -447,9 +450,339 @@ TEST(OtherTest, decoder_test_challenge_movs)
 	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
 }
 
-/*
 TEST(OtherTest, decoder_test_add_sub_cmp_jnz)
 {
-    test_decoder("res/listing_0041_add_sub_cmp_jnz");
+  //std::vector<Instruction> decoded_instructions = decode_asm_file("res/listing_0041_add_sub_cmp_jnz");
+  std::vector<Instruction> decoded_instructions = decode_asm_file("res/add");
+	Instruction decoded;
+	uint8_t instruction_count = 0;
+
+	// Add
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add bx, [bx + si]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bx + si");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add bx, [bp]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add si, 2" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "si");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 2);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add bp, 2" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "bp");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 2);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add cx, 8" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "cx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 8);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add bx, [bp + 0]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].displacement, 0); //TODO check that displacement actually is set
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add cx, [bx + 2]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "cx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].displacement, 2); 
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add bh, [bp + si + 4]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "bh");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp + si");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].displacement, 4); 
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add di, [bp + di + 6]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "di");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp + di");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].displacement, 6); 
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add [bx + si], bx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].address, "bx + si");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].reg, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add [bp], bx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].address, "bp");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].reg, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add [bp + 0], bx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].address, "bp");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 0);
+	ASSERT_EQ(decoded.operands[1].reg, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add [bx + 2], cx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].address, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 2);
+	ASSERT_EQ(decoded.operands[1].reg, "cx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add [bp + si + 4], bh" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].address, "bp + si");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 4);
+	ASSERT_EQ(decoded.operands[1].reg, "bh");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add [bp + di + 6], di" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].address, "bp + di");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 6);
+	ASSERT_EQ(decoded.operands[1].reg, "di");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add byte [bx], 34" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].address, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].immediate, 34);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add word [bp + si + 1000], 29" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].address, "bp + si");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 1000);
+	ASSERT_EQ(decoded.operands[1].immediate, 29);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add ax, [bp]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "ax");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add al, [bx + si]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "al");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bx + si");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add ax, bx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "ax");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].reg, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add al, ah" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "al");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].reg, "ah");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add ax, 1000" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "ax");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 1000);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add al, -30" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "al");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, -30);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: add al, 9" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "add");
+	ASSERT_EQ(decoded.operands[0].reg, "al");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 9);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+	// 
+	// sub bx, [bx+si]
+	// sub bx, [bp]
+	// sub si, 2
+	// sub bp, 2
+	// sub cx, 8
+	// sub bx, [bp + 0]
+	// sub cx, [bx + 2]
+	// sub bh, [bp + si + 4]
+	// sub di, [bp + di + 6]
+	// sub [bx+si], bx
+	// sub [bp], bx
+	// sub [bp + 0], bx
+	// sub [bx + 2], cx
+	// sub [bp + si + 4], bh
+	// sub [bp + di + 6], di
+	// sub byte [bx], 34
+	// sub word [bx + di], 29
+	// sub ax, [bp]
+	// sub al, [bx + si]
+	// sub ax, bx
+	// sub al, ah
+	// sub ax, 1000
+	// sub al, -30
+	// sub al, 9
+	// 
+	// cmp bx, [bx+si]
+	// cmp bx, [bp]
+	// cmp si, 2
+	// cmp bp, 2
+	// cmp cx, 8
+	// cmp bx, [bp + 0]
+	// cmp cx, [bx + 2]
+	// cmp bh, [bp + si + 4]
+	// cmp di, [bp + di + 6]
+	// cmp [bx+si], bx
+	// cmp [bp], bx
+	// cmp [bp + 0], bx
+	// cmp [bx + 2], cx
+	// cmp [bp + si + 4], bh
+	// cmp [bp + di + 6], di
+	// cmp byte [bx], 34
+	// cmp word [4834], 29
+	// cmp ax, [bp]
+	// cmp al, [bx + si]
+	// cmp ax, bx
+	// cmp al, ah
+	// cmp ax, 1000
+	// cmp al, -30
+	// cmp al, 9
+	// 
+	// test_label0:
+	// jnz test_label1
+	// jnz test_label0
+	// test_label1:
+	// jnz test_label0
+	// jnz test_label1
+	// 
+	// label:
+	// je label
+	// jl label
+	// jle label
+	// jb label
+	// jbe label
+	// jp label
+	// jo label
+	// js label
+	// jne label
+	// jnl label
+	// jg label
+	// jnb label
+	// ja label
+	// jnp label
+	// jno label
+	// jns label
+	// loop label
+	// loopz label
+	// loopnz label
+	// jcxz label
 }
-*/

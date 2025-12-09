@@ -1,4 +1,6 @@
 #pragma once
+#include "instruction-table.hpp"
+#include <optional>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -57,8 +59,8 @@ struct Operand {
 struct Instruction {
 	std::string name;
 	Operand operands[2];
-	bool explicit_size = false;
 	bool single_operand = false;
+	bool wide;
 
 	std::vector<unsigned char> processed_bytes;
 	std::string encoding_description;
@@ -69,13 +71,13 @@ struct Instruction {
 		if (single_operand) {
 			return name + " " + operands[0].to_string() + "\n";
 		}
+		*/
 
 		std::string operand_size;
-		if (explicit_size && operands[0].type != Register) {
-			operand_size = operands[0].size == Word ? "word " : "byte ";;
+		if (operands[0].type != Register) {
+			operand_size = wide ? "word " : "byte ";
 		}
-		*/
-		return name + " " + operands[0].to_string() + ", " + operands[1].to_string();
+		return name + " " + operand_size +  operands[0].to_string() + ", " + operands[1].to_string();
 	}
 
 	void print_debug()
@@ -94,3 +96,4 @@ struct Instruction {
 };
 
 std::vector<Instruction> decode_asm_file(const std::string& path);
+std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, size_t offset, Instruction_encoding encoding);

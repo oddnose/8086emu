@@ -14,11 +14,13 @@ enum Instruction_bits_usage
 	Data,
 	Data_if_w,
 	Direction,
+	S_Bit, //unclear what it stands for
 	Wide,
 	Addr_lo,
 	Addr_hi,
 
-	Imp_Direction
+	Imp_Direction,
+	Imp_Accumulator
 };
 
 struct Instruction_bits 
