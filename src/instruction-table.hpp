@@ -15,7 +15,8 @@ enum Instruction_bits_usage
 	Data_if_w,
 	Direction,
 	Wide,
-	Addr,
+	Addr_lo,
+	Addr_hi,
 
 	Imp_Direction
 };

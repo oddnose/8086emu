@@ -21,5 +21,8 @@ target_include_directories(8086emu_test PRIVATE src)
 file(COPY ${CMAKE_SOURCE_DIR}/test/res DESTINATION ${CMAKE_BINARY_DIR}/test)
 file(COPY ${CMAKE_SOURCE_DIR}/test/res DESTINATION ${CMAKE_BINARY_DIR})
 
+
 include(GoogleTest)
 gtest_discover_tests(8086emu_test)
+
+set_property(TARGET 8086emu_test PROPERTY WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/test)

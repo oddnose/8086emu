@@ -1,6 +1,4 @@
-#include <fstream>
 #include <gtest/gtest.h>
-#include <stdexcept>
 #include <unistd.h>
 #include "../src/decoder.h"
     #include <unistd.h>
@@ -364,7 +362,6 @@ TEST(OtherTest, decoder_test_challenge_movs)
 	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
 
 	// Explicit sizes
-	// mov [bp + di], byte 7
 	decoded = decoded_instructions.at(instruction_count++);
 	std::cout << "\n=====================================================" << std::endl;
 	std::cout << "Original: mov [bp + di], byte 7" << std::endl;
@@ -374,19 +371,80 @@ TEST(OtherTest, decoder_test_challenge_movs)
 	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
 	ASSERT_EQ(decoded.operands[1].immediate, 7);
 	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
-	// mov [di + 901], word 347
-	// 
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: mov [di + 901], word 347" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "mov");
+	ASSERT_EQ(decoded.operands[0].address, "di");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 901);
+	ASSERT_EQ(decoded.operands[1].immediate, 347);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
 	// Direct address
-	// mov bp, [5]
-	// mov bx, [3458]
-	// 
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: mov bp, [5]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "mov");
+	ASSERT_EQ(decoded.operands[0].reg, "bp");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].displacement, 5);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Direct_address);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: mov bx, [3458]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "mov");
+	ASSERT_EQ(decoded.operands[0].reg, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].displacement, 3458);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Direct_address);
+
 	// Memory-to-accumulator test
-	// mov ax, [2555]
-	// mov ax, [16]
-	// 
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: mov ax, [2555]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "mov");
+	ASSERT_EQ(decoded.operands[0].reg, "ax");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].displacement, 2555);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Direct_address);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: mov ax, [16]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "mov");
+	ASSERT_EQ(decoded.operands[0].reg, "ax");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].displacement, 16);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Direct_address);
+
 	// Accumulator-to-memory test
-	// mov [2554], ax
-	// mov [15], ax
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: mov [2554], ax" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "mov");
+	ASSERT_EQ(decoded.operands[0].displacement, 2554);
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Direct_address);
+	ASSERT_EQ(decoded.operands[1].reg, "ax");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: mov [15], ax" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "mov");
+	ASSERT_EQ(decoded.operands[0].displacement, 15);
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Direct_address);
+	ASSERT_EQ(decoded.operands[1].reg, "ax");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
 }
 
 /*

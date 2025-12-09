@@ -48,8 +48,7 @@ struct Operand {
 			case Immediate:
 				return std::to_string(immediate);
 			case Direct_address:
-				//return "[" + std::to_string(value) + "]";
-				return "";
+				return "[" + std::to_string(displacement) + "]";
 		}
 		return "";
 	}

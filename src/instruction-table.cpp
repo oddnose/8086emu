@@ -29,8 +29,8 @@ std::vector<Instruction_encoding> get_all_instructions()
 	ENCODING(mov, "Register/memory to/from register", BYTE(BIT(Literal, 0b100010, 6), D, W), BYTE(MOD, REG, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 	ENCODING(mov, "Immediate to register/memory", BYTE(BIT(Literal, 0b1100011, 7), W), BYTE(MOD, BIT(Literal, 0b000, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(0))),
 	ENCODING(mov, "Immediate to register", BYTE(BIT(Literal, 0b1011, 4), W, REG), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(1))),
-	ENCODING(mov, "Memory to accumulator", BYTE(BIT(Literal, 0b1010000, 7), W), FULL_BYTE(Addr), FULL_BYTE(Addr)),
-	ENCODING(mov, "Accumulator to memory", BYTE(BIT(Literal, 0b1010001, 7), W), FULL_BYTE(Addr), FULL_BYTE(Addr)),
+	ENCODING(mov, "Memory to accumulator", BYTE(BIT(Literal, 0b1010000, 7), W), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi), EMPTY_BYTE(IMP_D(1))),
+	ENCODING(mov, "Accumulator to memory", BYTE(BIT(Literal, 0b1010001, 7), W), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi), EMPTY_BYTE(IMP_D(0))),
 	//TODO: Register/memory to segment register
 	//TODO: Segment register to register/memory
 	
