@@ -24,6 +24,7 @@
 
 std::string mov = "mov";
 std::string add = "add";
+std::string sub = "sub";
 
 std::vector<Instruction_encoding> get_all_instructions()
 {
@@ -52,8 +53,18 @@ std::vector<Instruction_encoding> get_all_instructions()
 	// ADD
 	ENCODING(add, "Reg/memory with register to either", BYTE(BIT(Literal, 0b000000, 6), D, W), BYTE(MOD, REG, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 	ENCODING(add, "Immediate to register/memory", BYTE(BIT(Literal, 0b100000, 6), S, W), BYTE(MOD, BIT(Literal, 0b000, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(0))),
-	ENCODING(add, "Immediate to accumulator", BYTE(BIT(Literal, 0b0000010, 7), W), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(1), IMP_ACC))
+	ENCODING(add, "Immediate to accumulator", BYTE(BIT(Literal, 0b0000010, 7), W), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(1), IMP_ACC)),
+
+	//TODO ADC
+	
+	//TODO INC
+	
+	//TODO SUB
+	ENCODING(sub, "Reg/memory and register to either", BYTE(BIT(Literal, 0b001010, 6), D, W), BYTE(MOD, REG, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+	ENCODING(sub, "Immediate from register/memory", BYTE(BIT(Literal, 0b100000, 6), S, W), BYTE(MOD, BIT(Literal, 0b101, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi), FULL_BYTE(Data), FULL_BYTE(Data_if_w)),
+	ENCODING(sub, "Immediate from accumulator", BYTE(BIT(Literal, 0b0010110, 7), W), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(1), IMP_ACC)),
 	};
+	
 	return all_instructions;
 
 }
