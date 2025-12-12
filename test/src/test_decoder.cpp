@@ -957,30 +957,255 @@ TEST(OtherTest, decoder_test_add_sub_cmp_jnz)
 	ASSERT_EQ(decoded.operands[1].immediate, 9);
 	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
 
-	// cmp bx, [bx+si]
-	// cmp bx, [bp]
-	// cmp si, 2
-	// cmp bp, 2
-	// cmp cx, 8
-	// cmp bx, [bp + 0]
-	// cmp cx, [bx + 2]
-	// cmp bh, [bp + si + 4]
-	// cmp di, [bp + di + 6]
-	// cmp [bx+si], bx
-	// cmp [bp], bx
-	// cmp [bp + 0], bx
-	// cmp [bx + 2], cx
-	// cmp [bp + si + 4], bh
-	// cmp [bp + di + 6], di
-	// cmp byte [bx], 34
-	// cmp word [4834], 29
-	// cmp ax, [bp]
-	// cmp al, [bx + si]
-	// cmp ax, bx
-	// cmp al, ah
-	// cmp ax, 1000
-	// cmp al, -30
+	//CMP
+	
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp bx, [bx + si]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bx + si");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp bx, [bp]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp si, 2" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "si");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 2);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp bp, 2" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "bp");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 2);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp cx, 8" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "cx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 8);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp bx, [bp + 0]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].displacement, 0);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp cx, [bx + 2]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "cx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].displacement, 2);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp bh, [bp + si + 4]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "bh");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp + si");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].displacement, 4);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp di, [bp + di + 6]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "di");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp + di");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].displacement, 6);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp [bx + si], bx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].address, "bx + si");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].reg, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp [bp], bx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].address, "bp");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].reg, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp [bp + 0], bx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].address, "bp");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 0);
+	ASSERT_EQ(decoded.operands[1].reg, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp [bx + 2], cx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].address, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 2);
+	ASSERT_EQ(decoded.operands[1].reg, "cx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp [bp + si + 4], bh" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].address, "bp + si");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 4);
+	ASSERT_EQ(decoded.operands[1].reg, "bh");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp [bp + di + 6], di" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].address, "bp + di");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[0].displacement, 6);
+	ASSERT_EQ(decoded.operands[1].reg, "di");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp [bx], 34" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].address, "bx");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Memory);
+	ASSERT_EQ(decoded.operands[1].immediate, 34);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp word [4834], 29" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].displacement, 4834);
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Direct_address);
+	ASSERT_EQ(decoded.operands[1].immediate, 29);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp ax, [bp]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "ax");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bp");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp al, [bx + si]" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "al");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].address, "bx + si");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Memory);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp ax, bx" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "ax");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].reg, "bx");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp al, ah" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "al");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].reg, "ah");
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Register);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp ax, 1000" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "ax");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 1000);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
+
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp al, -30" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "al");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, -30);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
 	// cmp al, 9
+	decoded = decoded_instructions.at(instruction_count++);
+	std::cout << "\n=====================================================" << std::endl;
+	std::cout << "Original: cmp al, 9" << std::endl;
+	decoded.print_debug();
+	ASSERT_EQ(decoded.name, "cmp");
+	ASSERT_EQ(decoded.operands[0].reg, "al");
+	ASSERT_EQ(decoded.operands[0].type, Operand_type::Register);
+	ASSERT_EQ(decoded.operands[1].immediate, 9);
+	ASSERT_EQ(decoded.operands[1].type, Operand_type::Immediate);
 	// 
 	// test_label0:
 	// jnz test_label1

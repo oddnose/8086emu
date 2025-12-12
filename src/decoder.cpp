@@ -221,6 +221,7 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					direction = bit.value;
 					break;
 				case Instruction_bits_usage::Imp_Accumulator:
+					byte_read = false;
 					reg_operand.reg = wide ? reg_names_16bit[0] : reg_names_8bit[0]; //accumulator used
 					break;
 			}
