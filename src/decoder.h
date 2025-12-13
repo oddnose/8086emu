@@ -8,10 +8,12 @@
 #include <iostream>
 
 enum Operand_type {
+	No_op_type,
 	Register,
 	Memory,
 	Immediate,
-	Direct_address
+	Direct_address,
+	Relative_offset
 };
 enum Operand_size {
 	Byte,
@@ -19,7 +21,7 @@ enum Operand_size {
 };
 
 struct Operand {
-	Operand_type type;
+	Operand_type type = No_op_type;
 	//TODO: use union if possible
 	std::string reg;
 	int16_t displacement = 0;
@@ -35,6 +37,8 @@ struct Operand {
 	std::string to_string() 
 	{
 		switch (type) {
+			case No_op_type:
+				return "";
 			case Register:
 				return reg;
 			case Memory:
@@ -51,6 +55,17 @@ struct Operand {
 				return std::to_string(immediate);
 			case Direct_address:
 				return "[" + std::to_string(displacement) + "]";
+			case Relative_offset:
+				//Adding 2 since that is the size of instructions using relative offset
+				if (displacement + 2 > 0) {
+					return "$+" + std::to_string(displacement + 2) + "+0";
+				} 
+				else if (displacement + 2 == 0) {
+					return "$+0";
+				}
+				else {
+					return "$" + std::to_string(displacement + 2) + "+0";
+				}
 		}
 		return "";
 	}
@@ -59,7 +74,6 @@ struct Operand {
 struct Instruction {
 	std::string name;
 	Operand operands[2];
-	bool single_operand = false;
 	bool wide;
 
 	std::vector<unsigned char> processed_bytes;
@@ -67,17 +81,24 @@ struct Instruction {
 
 	std::string to_string() 
 	{
-		/*
-		if (single_operand) {
-			return name + " " + operands[0].to_string() + "\n";
-		}
-		*/
+		std::ostringstream output;
+		output << name;
 
 		std::string operand_size;
-		if (operands[0].type != Register) {
-			operand_size = wide ? "word " : "byte ";
+		if (operands[0].type == Memory || operands[0].type == Direct_address) {
+			output << (wide ? " word" : " byte");
 		}
-		return name + " " + operand_size +  operands[0].to_string() + ", " + operands[1].to_string();
+
+		std::string op0_string = operands[0].to_string();
+		std::string op1_string = operands[1].to_string();
+
+		if (!op0_string.empty()) {
+			output << " " << op0_string;
+		}
+		if (!op1_string.empty()) {
+			output << ", " << op1_string;
+		}
+		return output.str();
 	}
 
 	void print_debug()

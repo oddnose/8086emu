@@ -7,6 +7,7 @@ set(TEST_FILES
     ${CMAKE_SOURCE_DIR}/src/instruction-table.hpp
     ${CMAKE_SOURCE_DIR}/src/instruction-table.cpp
     src/test_decoder.cpp
+    src/test_nasm_decoder.cpp
 )
 
 add_executable(8086emu_test ${TEST_FILES})
@@ -15,11 +16,12 @@ add_executable(8086emu_test ${TEST_FILES})
 target_link_libraries(
     8086emu_test PRIVATE 
     GTest::gtest_main
+		8086emu_lib
 )
 
 target_include_directories(8086emu_test PRIVATE src)
+target_include_directories(8086emu_test PRIVATE ${CMAKE_SOURCE_DIR}/src)
 file(COPY ${CMAKE_SOURCE_DIR}/test/res DESTINATION ${CMAKE_BINARY_DIR}/test)
-file(COPY ${CMAKE_SOURCE_DIR}/test/res DESTINATION ${CMAKE_BINARY_DIR})
 
 
 include(GoogleTest)

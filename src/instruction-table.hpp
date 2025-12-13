@@ -18,6 +18,7 @@ enum Instruction_bits_usage
 	Wide,
 	Addr_lo,
 	Addr_hi,
+	Rel_offset,
 
 	Imp_Direction,
 	Imp_Accumulator

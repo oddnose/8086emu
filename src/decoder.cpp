@@ -211,8 +211,11 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					rm_operand.displacement |= (static_cast<uint16_t>(value) << 8);
 					break;
 				case Instruction_bits_usage::S_Bit:
-					std::cout << "s bit" << std::endl;
 					s_bit = true;
+					break;
+				case Instruction_bits_usage::Rel_offset:
+					rm_operand.type = Operand_type::Relative_offset;
+					rm_operand.displacement = static_cast<int8_t>(value);
 					break;
 
 				//Implicit usages
@@ -222,6 +225,7 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					break;
 				case Instruction_bits_usage::Imp_Accumulator:
 					byte_read = false;
+					reg_operand.type = Operand_type::Register;
 					reg_operand.reg = wide ? reg_names_16bit[0] : reg_names_8bit[0]; //accumulator used
 					break;
 			}
@@ -240,6 +244,7 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 	if (immediate_operand.type == Operand_type::Immediate) {
 		instruction.operands[1] = immediate_operand;
 	}
+	instruction.wide = wide;
 
 	return std::make_optional(instruction);
 }
