@@ -15,11 +15,13 @@
 #define MOD BIT(Mod, 0, 2)
 #define REG BIT(Reg, 0, 3)
 #define RM BIT(Rm, 0, 3)
+#define SR BIT(Sr, 0, 2)
 
 // Implied bits that are hard-coded in an instruction, or otherwise implied
 #define EMPTY_BYTE(...) BYTE(__VA_ARGS__)
 #define IMP_D(value) BIT(Imp_Direction, value, 0)
 #define IMP_ACC BIT(Imp_Accumulator, 0, 0)
+#define IMP_W(value) BIT(Imp_Wide, value, 0)
 
 
 std::string mov = "mov";
@@ -42,6 +44,10 @@ std::vector<Instruction_encoding> get_all_instructions()
 		// Segment register to register/memory
 		
 		// PUSH
+		ENCODING("push", "Register/memory", EMPTY_BYTE(IMP_D(0), IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b110, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+		ENCODING("push", "Register", EMPTY_BYTE(IMP_D(1), IMP_W(1)), BYTE(BIT(Literal, 0b01010, 5), REG)),
+		ENCODING("push", "Segment register", BYTE(BIT(Literal, 0b000, 3), SR, BIT(Literal, 0b110, 3)), EMPTY_BYTE(IMP_D(1))),
+
 		// POP
 		// XCHG
 		// IN

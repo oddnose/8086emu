@@ -33,6 +33,13 @@ const std::string reg_names_16bit[] = {
   "di" // des index
 };
 
+const std::string seg_reg_names[] = { 
+  "es", 
+  "cs", 
+  "ss", 
+  "ds"
+};
+
 const std::string rm_field_encodings[] = {
   "bx + si",
   "bx + di",
@@ -217,6 +224,10 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					rm_operand.type = Operand_type::Relative_offset;
 					rm_operand.displacement = static_cast<int8_t>(value);
 					break;
+				case Instruction_bits_usage::Sr:
+					reg_operand.type = Operand_type::Register;
+					reg_operand.reg = seg_reg_names[value];
+					break;
 
 				//Implicit usages
 				case Instruction_bits_usage::Imp_Direction:
@@ -227,6 +238,10 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					byte_read = false;
 					reg_operand.type = Operand_type::Register;
 					reg_operand.reg = wide ? reg_names_16bit[0] : reg_names_8bit[0]; //accumulator used
+					break;
+				case Instruction_bits_usage::Imp_Wide:
+					byte_read = false;
+					wide = bit.value;
 					break;
 			}
 		}

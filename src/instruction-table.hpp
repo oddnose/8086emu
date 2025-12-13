@@ -14,14 +14,16 @@ enum Instruction_bits_usage
 	Data,
 	Data_if_w,
 	Direction,
-	S_Bit, //unclear what it stands for
+	S_Bit, //Sign flag
 	Wide,
 	Addr_lo,
 	Addr_hi,
 	Rel_offset,
+	Sr, //Segment Register
 
 	Imp_Direction,
-	Imp_Accumulator
+	Imp_Accumulator,
+	Imp_Wide
 };
 
 struct Instruction_bits 
