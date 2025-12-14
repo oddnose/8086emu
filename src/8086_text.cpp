@@ -1,4 +1,5 @@
 #include "8086_text.h"
+#include <sstream>
 
 std::string get_print_instructions(std::vector<Instruction> instructions) 
 {

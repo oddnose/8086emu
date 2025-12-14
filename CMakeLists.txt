@@ -10,6 +10,8 @@ set(SOURCE_FILES
 		src/instruction-table.cpp
 		src/8086_text.h
 		src/8086_text.cpp
+		src/instruction.hpp
+		src/instruction.cpp
 )
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

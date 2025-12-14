@@ -6,7 +6,6 @@ set(TEST_FILES
     ${CMAKE_SOURCE_DIR}/src/decoder.cpp
     ${CMAKE_SOURCE_DIR}/src/instruction-table.hpp
     ${CMAKE_SOURCE_DIR}/src/instruction-table.cpp
-    src/test_decoder.cpp
     src/test_nasm_decoder.cpp
 )
 

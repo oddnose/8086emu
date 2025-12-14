@@ -1,4 +1,5 @@
 #include "decoder.h"
+#include <bitset>
 #include <csetjmp>
 #include <cstddef>
 #include <cstdint>
@@ -7,8 +8,10 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <bitset>
 #include <vector>
 #include "instruction-table.hpp"
+#include "instruction.hpp"
 
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
@@ -57,49 +60,6 @@ enum Displacement {
 	Sixteen_bit
 };
 
-
-std::vector<Instruction> decode_asm_file(const std::string& path)
-{
-	std::ifstream asm_file(path, std::ios::binary);
-	if (!asm_file) {
-		throw std::runtime_error("Failed to open asm file");
-	}
-
-	std::vector<unsigned char> data(
-		(std::istreambuf_iterator<char>(asm_file)),
-		std::istreambuf_iterator<char>());
-
-
-	std::vector<Instruction> instructions;
-
-	size_t offset = 0;
-	while (offset < data.size()) {
-		bool found = false;
-		for (Instruction_encoding encoding : get_all_instructions()) {
-
-			std::optional<Instruction> instruction = decode_instruction(data, offset, encoding);
-			if (!instruction.has_value()) {
-				continue;
-			}
-			found = true;
-			instruction.value().instruction_pointer = offset;
-			instructions.emplace_back(instruction.value());
-			offset += instruction->processed_bytes.size();
-			break;
-		}
-
-		if (!found) {
-			for (Instruction inst : instructions) {
-				inst.print_debug();
-			}
-
-			std::cerr << "Didn't find an encoding for instruction starting with " << std::bitset<8>(data[offset]);
-			std::exit(1);
-		}
-	}
-
-	return instructions;
-}
 
 
 std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, size_t offset, Instruction_encoding encoding)
@@ -304,7 +264,7 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 
 						std::optional<Instruction> instruction = decode_instruction(data, offset, enc);
 						if (instruction.has_value()) {
-							instruction.value().prefix = encoding.name + " ";
+							instruction.value().prefix = get_instruction_name(encoding.name) + " ";
 							instruction.value().processed_bytes.insert(instruction.value().processed_bytes.begin(), data[offset - 1]);
 
 							return instruction;
@@ -366,4 +326,47 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 	instruction.wide = wide;
 
 	return std::make_optional(instruction);
+}
+
+std::vector<Instruction> decode_asm_file(const std::string& path)
+{
+	std::ifstream asm_file(path, std::ios::binary);
+	if (!asm_file) {
+		throw std::runtime_error("Failed to open asm file");
+	}
+
+	std::vector<unsigned char> data(
+		(std::istreambuf_iterator<char>(asm_file)),
+		std::istreambuf_iterator<char>());
+
+
+	std::vector<Instruction> instructions;
+
+	size_t offset = 0;
+	while (offset < data.size()) {
+		bool found = false;
+		for (Instruction_encoding encoding : get_all_instructions()) {
+
+			std::optional<Instruction> instruction = decode_instruction(data, offset, encoding);
+			if (!instruction.has_value()) {
+				continue;
+			}
+			found = true;
+			instruction.value().instruction_pointer = offset;
+			instructions.emplace_back(instruction.value());
+			offset += instruction->processed_bytes.size();
+			break;
+		}
+
+		if (!found) {
+			for (Instruction inst : instructions) {
+				inst.print_debug();
+			}
+
+			std::cerr << "Didn't find an encoding for instruction starting with " << std::bitset<8>(data[offset]);
+			std::exit(1);
+		}
+	}
+
+	return instructions;
 }

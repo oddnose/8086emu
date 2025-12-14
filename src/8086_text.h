@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decoder.h"
+#include "instruction.hpp"
 #include <string>
 #include <vector>
 
