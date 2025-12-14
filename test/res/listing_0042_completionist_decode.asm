@@ -406,14 +406,14 @@ lock not byte CS:[bp + 9905]
 
 ; TODO: Implement
 
-; call 123:456
-; jmp 789:34
-;
-; mov [bx+si+59],es
-;
-; jmp 2620
-; call 11804
-;
+call 123:456
+jmp 789:34
+
+mov [bx+si+59],es
+
+jmp 2620
+call 11804
+
 ; retf 17556
 ; ret 17560
 ; retf

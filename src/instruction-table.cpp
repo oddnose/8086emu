@@ -44,8 +44,8 @@ std::vector<Instruction_encoding> get_all_instructions()
 		ENCODING(mov, "Immediate to register", BYTE(BIT(Literal, 0b1011, 4), W, REG), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(1))),
 		ENCODING(mov, "Memory to accumulator", BYTE(BIT(Literal, 0b1010000, 7), W), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi), EMPTY_BYTE(IMP_D(1), IMP_ACC)),
 		ENCODING(mov, "Accumulator to memory", BYTE(BIT(Literal, 0b1010001, 7), W), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi), EMPTY_BYTE(IMP_D(0), IMP_ACC)),
-		ENCODING(mov, "Register/memory to segment register", BYTE(BIT(Literal, 0b10001110, 8)), BYTE(MOD, BIT(Literal, 0b0, 1), SR, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
-		ENCODING(mov, "Segment register to register/memory", BYTE(BIT(Literal, 0b10001100, 8)), BYTE(MOD, BIT(Literal, 0b0, 1), SR, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+		ENCODING(mov, "Register/memory to segment register", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b10001110, 8)), BYTE(MOD, BIT(Literal, 0b0, 1), SR, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+		ENCODING(mov, "Segment register to register/memory", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b10001100, 8)), BYTE(MOD, BIT(Literal, 0b0, 1), SR, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 		
 		ENCODING("push", "Register/memory", EMPTY_BYTE(IMP_D(0), IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b110, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 		ENCODING("push", "Register", EMPTY_BYTE(IMP_D(1), IMP_W(1)), BYTE(BIT(Literal, 0b01010, 5), REG)),
@@ -160,15 +160,15 @@ std::vector<Instruction_encoding> get_all_instructions()
 
 		// CONTROL TRANSFER
 
-		ENCODING("call", "Direct within segment", BYTE(BIT(Literal, 0b11101000, 8)), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi)),
+		ENCODING("call", "Direct within segment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11101000, 8)), FULL_BYTE(IP_inc_lo), FULL_BYTE(IP_inc_hi)),
 		ENCODING("call", "Indirect within segment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b010, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
-		ENCODING("call", "Direct intersegment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b10011010, 8)), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi), FULL_BYTE(Data), FULL_BYTE(Data_if_w)),
+		ENCODING("call", "Direct intersegment", EMPTY_BYTE(IMP_W(1), IMP_D(1)), BYTE(BIT(Literal, 0b10011010, 8)), FULL_BYTE(IP_lo), FULL_BYTE(IP_hi), FULL_BYTE(CS_lo), FULL_BYTE(CS_hi)),
 		ENCODING("call", "Indirect intersegment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b011, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 
-		ENCODING("jmp", "Direct within segment", BYTE(BIT(Literal, 0b11101000, 8)), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi)),
-		ENCODING("jmp", "Direct within segment-short", BYTE(BIT(Literal, 0b11101011, 8)), FULL_BYTE(Addr_lo)),
+		ENCODING("jmp", "Direct within segment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11101001, 8)), FULL_BYTE(IP_inc_lo), FULL_BYTE(IP_inc_hi)),
+		ENCODING("jmp", "Direct within segment-short", BYTE(BIT(Literal, 0b11101011, 8)), FULL_BYTE(IP_lo)),
 		ENCODING("jmp", "Indirect within segment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b100, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
-		ENCODING("jmp", "Direct intersegment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11101010, 8)), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi), FULL_BYTE(Data), FULL_BYTE(Data_if_w)),
+		ENCODING("jmp", "Direct intersegment", EMPTY_BYTE(IMP_W(1), IMP_D(1)), BYTE(BIT(Literal, 0b11101010, 8)), FULL_BYTE(IP_lo), FULL_BYTE(IP_hi), FULL_BYTE(CS_lo), FULL_BYTE(CS_hi)),
 		ENCODING("jmp", "Indirect intersegment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b101, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 
 		ENCODING("ret", "Within segment", BYTE(BIT(Literal, 0b11000011, 8))),

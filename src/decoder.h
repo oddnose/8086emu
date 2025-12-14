@@ -25,6 +25,7 @@ struct Operand {
   int16_t displacement = 0;
   int16_t immediate = 0;
   std::string address;
+	size_t rel_size = 2;
 
   std::string to_string() {
     switch (type) {
@@ -46,12 +47,12 @@ struct Operand {
       return prefix + "[" + std::to_string(displacement) + "]";
     case Relative_offset:
       // Adding 2 since that is the size of instructions using relative offset
-      if (displacement + 2 > 0) {
-        return "$+" + std::to_string(displacement + 2) + "+0";
-      } else if (displacement + 2 == 0) {
+      if (displacement + rel_size > 0) {
+        return "$+" + std::to_string(displacement + rel_size) + "+0";
+      } else if (displacement + rel_size == 0) {
         return "$+0";
       } else {
-        return "$" + std::to_string(displacement + 2) + "+0";
+        return "$" + std::to_string(displacement + rel_size) + "+0";
       }
     }
     return "";
@@ -62,8 +63,10 @@ struct Instruction {
   std::string name;
   std::string prefix;
   std::string postfix;
+	int instruction_pointer;
   Operand operands[2];
   bool wide;
+	bool direct_intersegment;
 
   std::vector<unsigned char> processed_bytes;
   std::string encoding_description;
@@ -88,7 +91,7 @@ struct Instruction {
       output << " " << op0_string;
     }
     if (!op1_string.empty()) {
-      output << ", " << op1_string;
+      output << (direct_intersegment ? ":" : ", ") << op1_string;
     }
 
     if (!postfix.empty()) {

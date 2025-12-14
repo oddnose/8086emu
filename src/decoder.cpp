@@ -82,6 +82,7 @@ std::vector<Instruction> decode_asm_file(const std::string& path)
 				continue;
 			}
 			found = true;
+			instruction.value().instruction_pointer = offset;
 			instructions.emplace_back(instruction.value());
 			offset += instruction->processed_bytes.size();
 			break;
@@ -241,6 +242,30 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 						reg_operand.type = Operand_type::Immediate;
 						reg_operand.immediate = 1;
 					}
+					break;
+				case Instruction_bits_usage::IP_lo:
+					rm_operand.type = Operand_type::Immediate;
+					rm_operand.immediate = wide ? static_cast<int16_t>(value) : static_cast<int8_t>(value);
+					break;
+				case Instruction_bits_usage::IP_hi:
+					rm_operand.immediate |= static_cast<int16_t>(value) << 8;
+					break;
+				case Instruction_bits_usage::CS_lo:
+					instruction.direct_intersegment = true;
+					reg_operand.type = Operand_type::Immediate;
+					reg_operand.immediate = wide ? static_cast<int16_t>(value) : static_cast<int8_t>(value);
+					break;
+				case Instruction_bits_usage::CS_hi:
+					reg_operand.immediate |= static_cast<int16_t>(value) << 8;
+					break;
+				case Instruction_bits_usage::IP_inc_lo:
+					rm_operand.type = Operand_type::Immediate;
+					rm_operand.immediate = wide ? static_cast<int16_t>(value) : static_cast<int8_t>(value);
+					break;
+				case Instruction_bits_usage::IP_inc_hi:
+					rm_operand.immediate |= static_cast<int16_t>(value) << 8;
+					rm_operand.immediate += offset + 1;
+					//rm_operand.displacement += instruction.processed_bytes.size() + 1;
 					break;
 					
 

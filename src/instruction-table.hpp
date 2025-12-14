@@ -23,6 +23,12 @@ enum Instruction_bits_usage
 	Port,
 	Variable,
 	Zero,
+	IP_lo, //Instruction Pointer
+	IP_hi,
+	CS_lo, //Code Segment
+	CS_hi,
+	IP_inc_lo, 
+	IP_inc_hi,
 
 	Imp_Direction,
 	Imp_Accumulator,
