@@ -403,9 +403,6 @@ sbb word cs:[bx + si - 4332], 10328
 
 lock not byte CS:[bp + 9905]
 
-
-; TODO: Implement
-
 call 123:456
 jmp 789:34
 
@@ -414,30 +411,23 @@ mov [bx+si+59],es
 jmp 2620
 call 11804
 
-; retf 17556
-; ret 17560
-; retf
-; ret
-;
-; call [bp+si-0x3a]
-; call far [bp+si-0x3a]
-; jmp [di]
-; jmp far [di]
-;
-; jmp 21862:30600
+retf 17556
+ret 17560
+retf
+ret
 
-;
-; TODO(casey): I would like to uncomment this, but as far as I can tell, NASM doesn't recognize the ESC instruction :(
-; so even if I just force the assembler to output the bits here, our disasm will fail to assemble because it will (correctly!)
-; print the esc instruction and NASM will error because it doesn't know what that is.
-;
-; esc 938,ax
-;
+call [bp+si-0x3a]
+call far [bp+si-0x3a]
+jmp [di]
+jmp far [di]
 
+jmp 21862:30600
+
+; ESC not supported by NASM
+; esc 938,ax 
 ;
 ; TODO(casey): According to NASM, "rep movsb" is "not lockable". However the 8086 manual seems to think it is, and
 ; even describes what happens when you you lock a rep: the lock is held for the duration of the rep operation. So...
 ; yeah. Not sure why this doesn't work in NASM:
 ;
 ; lock rep movsb
-;

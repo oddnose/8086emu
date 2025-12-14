@@ -67,6 +67,7 @@ struct Instruction {
   Operand operands[2];
   bool wide;
 	bool direct_intersegment;
+	bool far;
 
   std::vector<unsigned char> processed_bytes;
   std::string encoding_description;
@@ -83,6 +84,10 @@ struct Instruction {
     if (operands[0].type == Memory || operands[0].type == Direct_address) {
       output << (wide ? " word" : " byte");
     }
+
+		if (far) {
+			output << " far";
+		}
 
     std::string op0_string = operands[0].to_string();
     std::string op1_string = operands[1].to_string();

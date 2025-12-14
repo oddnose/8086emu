@@ -36,7 +36,8 @@ enum Instruction_bits_usage
 	Imp_Port,
 	Imp_Prefix,
 	Imp_Sr_Prefix,
-	Imp_Postfix
+	Imp_Postfix,
+	Imp_Far
 
 };
 

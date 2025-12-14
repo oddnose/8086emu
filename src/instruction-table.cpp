@@ -28,6 +28,7 @@
 #define IMP_PREFIX BIT(Imp_Prefix, 0, 0)
 #define IMP_SR_PREFIX BIT(Imp_Sr_Prefix, 0, 0)
 #define IMP_POSTFIX BIT(Imp_Postfix, 0, 0)
+#define IMP_FAR BIT(Imp_Far, 0, 0)
 
 
 std::string mov = "mov";
@@ -163,18 +164,18 @@ std::vector<Instruction_encoding> get_all_instructions()
 		ENCODING("call", "Direct within segment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11101000, 8)), FULL_BYTE(IP_inc_lo), FULL_BYTE(IP_inc_hi)),
 		ENCODING("call", "Indirect within segment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b010, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 		ENCODING("call", "Direct intersegment", EMPTY_BYTE(IMP_W(1), IMP_D(1)), BYTE(BIT(Literal, 0b10011010, 8)), FULL_BYTE(IP_lo), FULL_BYTE(IP_hi), FULL_BYTE(CS_lo), FULL_BYTE(CS_hi)),
-		ENCODING("call", "Indirect intersegment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b011, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+		ENCODING("call", "Indirect intersegment", EMPTY_BYTE(IMP_W(1), IMP_FAR), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b011, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 
 		ENCODING("jmp", "Direct within segment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11101001, 8)), FULL_BYTE(IP_inc_lo), FULL_BYTE(IP_inc_hi)),
 		ENCODING("jmp", "Direct within segment-short", BYTE(BIT(Literal, 0b11101011, 8)), FULL_BYTE(IP_lo)),
 		ENCODING("jmp", "Indirect within segment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b100, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 		ENCODING("jmp", "Direct intersegment", EMPTY_BYTE(IMP_W(1), IMP_D(1)), BYTE(BIT(Literal, 0b11101010, 8)), FULL_BYTE(IP_lo), FULL_BYTE(IP_hi), FULL_BYTE(CS_lo), FULL_BYTE(CS_hi)),
-		ENCODING("jmp", "Indirect intersegment", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b101, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+		ENCODING("jmp", "Indirect intersegment", EMPTY_BYTE(IMP_W(1), IMP_FAR), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b101, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 
 		ENCODING("ret", "Within segment", BYTE(BIT(Literal, 0b11000011, 8))),
 		ENCODING("ret", "Within seg adding immed to SP", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11000010, 8)), FULL_BYTE(Data), FULL_BYTE(Data_if_w)),
-		ENCODING("ret", "Intersegment", BYTE(BIT(Literal, 0b11001011, 8))),
-		ENCODING("ret", "Intersegment adding immediate to SP", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11001010, 8)), FULL_BYTE(Data), FULL_BYTE(Data_if_w)),
+		ENCODING("retf", "Intersegment", BYTE(BIT(Literal, 0b11001011, 8))),
+		ENCODING("retf", "Intersegment adding immediate to SP", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b11001010, 8)), FULL_BYTE(Data), FULL_BYTE(Data_if_w)),
 
 		ENCODING("je", "Jump on equal/zero", BYTE(BIT(Literal, 0b01110100, 8)),FULL_BYTE(Rel_offset)),
 		ENCODING("jl", "Jump on less/not greater or equal", BYTE(BIT(Literal, 0b01111100, 8)),FULL_BYTE(Rel_offset)),

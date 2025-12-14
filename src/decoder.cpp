@@ -337,6 +337,10 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					byte_read = false;
 					instruction.postfix = wide ? "w" : "b";
 					break;
+				case Instruction_bits_usage::Imp_Far: 
+					byte_read = false;
+					instruction.far = true;
+					break;
 					
 			}
 		}
