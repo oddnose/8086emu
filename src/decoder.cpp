@@ -108,7 +108,7 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 	instruction.encoding_description = encoding.description;
 	bool wide = false;
 	bool direction = false;
-	bool s_bit = false;
+	bool sign = false;
 	char mod;
 	Displacement displacement_type = Displacement::None;
 	Operand reg_operand = {};
@@ -175,7 +175,7 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					if (displacement_type == Displacement::None)
 					{
 						byte_read = false;
-						continue;
+						break;
 					}
 					rm_operand.displacement = displacement_type == Displacement::Sixteen_bit ? 
 						static_cast<int16_t>(value) : static_cast<int8_t>(value);
@@ -193,14 +193,12 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					immediate_operand.immediate = wide ? static_cast<int16_t>(value) : static_cast<int8_t>(value);
 					break;
 				case Instruction_bits_usage::Data_if_w:
-					if (!wide || s_bit)
+					if (!wide || sign)
 					{
 						byte_read = false;
 						break;
 					}
-
 					immediate_operand.immediate |= (static_cast<uint16_t>(value) << 8);
-
 					break;
 				case Instruction_bits_usage::Direction:
 					direction = value;
@@ -212,13 +210,12 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					rm_operand.type = Operand_type::Direct_address;
 					rm_operand.displacement = wide ? static_cast<int16_t>(value) : static_cast<int8_t>(value);
 
-					reg_operand.type = Operand_type::Register;
 					break;
 				case Instruction_bits_usage::Addr_hi:
 					rm_operand.displacement |= (static_cast<uint16_t>(value) << 8);
 					break;
-				case Instruction_bits_usage::S_Bit:
-					s_bit = true;
+				case Instruction_bits_usage::Sign:
+					sign = value;
 					break;
 				case Instruction_bits_usage::Rel_offset:
 					rm_operand.type = Operand_type::Relative_offset;
@@ -228,21 +225,94 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					reg_operand.type = Operand_type::Register;
 					reg_operand.reg = seg_reg_names[value];
 					break;
+				case Instruction_bits_usage::Port:
+					reg_operand.type = Operand_type::Register;
+					reg_operand.reg = wide ? reg_names_16bit[0] : reg_names_8bit[0];
+
+					rm_operand.type = Operand_type::Immediate;
+					rm_operand.immediate = value;
+					break;
+				case Instruction_bits_usage::Variable:
+					if (value) {
+						reg_operand.type = Operand_type::Register;
+						reg_operand.reg = reg_names_8bit[value];
+					}
+					else {
+						reg_operand.type = Operand_type::Immediate;
+						reg_operand.immediate = 1;
+					}
+					break;
+					
 
 				//Implicit usages
 				case Instruction_bits_usage::Imp_Direction:
 					byte_read = false;
 					direction = bit.value;
 					break;
-				case Instruction_bits_usage::Imp_Accumulator:
+				case Instruction_bits_usage::Imp_Accumulator: {
 					byte_read = false;
-					reg_operand.type = Operand_type::Register;
-					reg_operand.reg = wide ? reg_names_16bit[0] : reg_names_8bit[0]; //accumulator used
+					std::string acc = wide ? reg_names_16bit[0] : reg_names_8bit[0]; //accumulator used
+					if (reg_operand.type != Operand_type::No_op_type) {
+						rm_operand.type = Operand_type::Register;
+						rm_operand.reg = acc;
+					} 
+					else {
+						reg_operand.type = Operand_type::Register;
+						reg_operand.reg = acc;
+					}
 					break;
+				}
 				case Instruction_bits_usage::Imp_Wide:
 					byte_read = false;
 					wide = bit.value;
 					break;
+				case Instruction_bits_usage::Imp_Port:
+					byte_read = false;
+					reg_operand.type = Operand_type::Register;
+					reg_operand.reg = wide ? reg_names_16bit[0] : reg_names_8bit[0];
+
+					rm_operand.type = Operand_type::Register;
+					rm_operand.reg = reg_names_16bit[2]; //dx
+					break;
+				case Instruction_bits_usage::Imp_Prefix:
+					for (Instruction_encoding enc : get_all_instructions()) {
+
+						std::optional<Instruction> instruction = decode_instruction(data, offset, enc);
+						if (instruction.has_value()) {
+							instruction.value().prefix = encoding.name + " ";
+							instruction.value().processed_bytes.insert(instruction.value().processed_bytes.begin(), data[offset - 1]);
+
+							return instruction;
+						}
+					}
+					return std::nullopt;
+				case Instruction_bits_usage::Imp_Sr_Prefix:
+					for (Instruction_encoding enc : get_all_instructions()) {
+
+						std::optional<Instruction> instruction = decode_instruction(data, offset, enc);
+						if (instruction.has_value()) {
+							if (instruction.value().operands[0].type == Operand_type::Memory || instruction.value().operands[0].type == Operand_type::Direct_address) {
+								instruction.value().operands[0].prefix = reg_operand.reg + ":";
+							}
+							else if (instruction.value().operands[1].type == Operand_type::Memory || instruction.value().operands[1].type == Operand_type::Direct_address) {
+								instruction.value().operands[1].prefix = reg_operand.reg + ":";
+							}
+							else {
+								std::cerr << "No memory operands event though using segment prefix" << std::endl;
+								std::exit(1);
+							}
+							instruction.value().processed_bytes.insert(instruction.value().processed_bytes.begin(), data[offset - 1]);
+
+							return instruction;
+						}
+					}
+					return std::nullopt;
+					
+				case Instruction_bits_usage::Imp_Postfix:
+					byte_read = false;
+					instruction.postfix = wide ? "w" : "b";
+					break;
+					
 			}
 		}
 		if (byte_read) 
@@ -257,7 +327,12 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 	instruction.operands[1] = direction ? rm_operand : reg_operand;
 
 	if (immediate_operand.type == Operand_type::Immediate) {
-		instruction.operands[1] = immediate_operand;
+		if (instruction.operands[0].type == Operand_type::No_op_type) {
+			instruction.operands[0] = immediate_operand;
+		}
+		else {
+			instruction.operands[1] = immediate_operand;
+		}
 	}
 	instruction.wide = wide;
 

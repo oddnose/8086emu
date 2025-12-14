@@ -51,3 +51,8 @@ TEST(NasmTest, decoder_test_add_sub_cmp_jnz)
 {
 	test_decoder("res/listing_0041_add_sub_cmp_jnz");
 }
+
+TEST(NasmTest, decoder_test_completionist)
+{
+	test_decoder("res/listing_0042_completionist_decode");
+}
