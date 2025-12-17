@@ -49,3 +49,15 @@ TEST(SimulatorTest, test_listing_0045)
 	EXPECT_EQ(memory.registers[Register::Ss], 17425);
 	EXPECT_EQ(memory.registers[Register::Ds], 13124);
 }
+
+TEST(SimulatorTest, test_listing_0046)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0046_add_sub_cmp_execution");
+	struct Memory memory = simulate(instructions);
+	EXPECT_EQ(memory.registers[Register::Bx], 57602);
+	EXPECT_EQ(memory.registers[Register::Cx], 3841);
+	EXPECT_EQ(memory.registers[Register::Sp], 998);
+	EXPECT_EQ(memory.s_flag, false);
+	EXPECT_EQ(memory.z_flag, true);
+
+}

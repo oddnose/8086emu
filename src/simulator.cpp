@@ -100,15 +100,56 @@ struct Memory simulate(std::vector<Instruction> instructions) {
   for (Instruction instruction : instructions) {
     std::ostringstream output;
     output << instruction.to_string() << " ; ";
+		uint16_t src_value = read(instruction.operands[1], &memory);
+		uint16_t dest_value = read(instruction.operands[0], &memory);
+
+		bool z_flag = false;
+		bool s_flag = false;
     switch (instruction.name) {
-    case Mov:
-      uint16_t src_value = read(instruction.operands[1], &memory);
-      uint16_t dest_value = read(instruction.operands[0], &memory);
-      write(instruction.operands[0], &memory, src_value);
-      output << instruction.operands[0].to_string() << ": ";
-			output << "0x" << std::hex << dest_value << "->0x" << std::hex << src_value;
-      break;
-    }
+			case Mov: {
+				write(instruction.operands[0], &memory, src_value);
+				output << instruction.operands[0].to_string() << ": ";
+				output << "0x" << std::hex << dest_value << "->0x" << std::hex << src_value;
+				break;
+			}
+			case Sub: {
+				uint16_t result = dest_value - src_value;
+				write(instruction.operands[0], &memory, result);
+				output << instruction.operands[0].to_string() << ": ";
+				output << "0x" << std::hex << dest_value << "->0x" << std::hex << result;
+				if ((result & 0x8000) > 0) {
+					s_flag = true;
+					output << " S_flag";
+				}
+				if (result == 0) {
+					z_flag = true;
+					output << " Z_flag";
+				}
+				break;
+			}
+			case Cmp: {
+				uint16_t result = dest_value - src_value;
+				output << " Result" << result;
+				if ((result & 0x8000) > 0) {
+					s_flag = true;
+					output << " S_flag";
+				}
+				if (result == 0) {
+					z_flag = true;
+					output << " Z_flag";
+				}
+				break;
+			}
+			case Add: {
+				uint16_t result = dest_value + src_value;
+				write(instruction.operands[0], &memory, result);
+				output << instruction.operands[0].to_string() << ": ";
+				output << "0x" << std::hex << dest_value << "->0x" << std::hex << result;
+				break;
+			}
+		}
+		memory.s_flag = s_flag;
+		memory.z_flag = z_flag;
     std::cout << output.str() << std::endl;
   }
 
@@ -125,5 +166,9 @@ struct Memory simulate(std::vector<Instruction> instructions) {
 	std::cout << get_register_name(Register::Cs) << " 0x" << std::hex << memory.registers[Register::Cs] << '\n';
 	std::cout << get_register_name(Register::Ss) << " 0x" << std::hex << memory.registers[Register::Ss] << '\n';
 	std::cout << get_register_name(Register::Ds) << " 0x" << std::hex << memory.registers[Register::Ds] << '\n';
+
+	std::cout << "\nFlags: " << std::endl;
+	std::cout << "S: " << memory.s_flag << '\n';
+	std::cout << "Z: " << memory.z_flag << '\n';
   return memory;
 }
