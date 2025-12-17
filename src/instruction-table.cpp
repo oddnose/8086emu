@@ -40,8 +40,8 @@ std::vector<Instruction_encoding> get_all_instructions()
 		ENCODING(Mov, "Immediate to register", BYTE(BIT(Literal, 0b1011, 4), W, REG), FULL_BYTE(Data), FULL_BYTE(Data_if_w), EMPTY_BYTE(IMP_D(1))),
 		ENCODING(Mov, "Memory to accumulator", BYTE(BIT(Literal, 0b1010000, 7), W), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi), EMPTY_BYTE(IMP_D(1), IMP_ACC)),
 		ENCODING(Mov, "Accumulator to memory", BYTE(BIT(Literal, 0b1010001, 7), W), FULL_BYTE(Addr_lo), FULL_BYTE(Addr_hi), EMPTY_BYTE(IMP_D(0), IMP_ACC)),
-		ENCODING(Mov, "Register/memory to segment register", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b10001110, 8)), BYTE(MOD, BIT(Literal, 0b0, 1), SR, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
-		ENCODING(Mov, "Segment register to register/memory", EMPTY_BYTE(IMP_W(1)), BYTE(BIT(Literal, 0b10001100, 8)), BYTE(MOD, BIT(Literal, 0b0, 1), SR, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+		ENCODING(Mov, "Register/memory to segment register", EMPTY_BYTE(IMP_W(1), IMP_D(1)), BYTE(BIT(Literal, 0b10001110, 8)), BYTE(MOD, BIT(Literal, 0b0, 1), SR, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
+		ENCODING(Mov, "Segment register to register/memory", EMPTY_BYTE(IMP_W(1), IMP_D(0)), BYTE(BIT(Literal, 0b10001100, 8)), BYTE(MOD, BIT(Literal, 0b0, 1), SR, RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 		
 		ENCODING(Push, "Register/memory", EMPTY_BYTE(IMP_D(0), IMP_W(1)), BYTE(BIT(Literal, 0b11111111, 8)), BYTE(MOD, BIT(Literal, 0b110, 3), RM), FULL_BYTE(Disp_lo), FULL_BYTE(Disp_hi)),
 		ENCODING(Push, "Register", EMPTY_BYTE(IMP_D(1), IMP_W(1)), BYTE(BIT(Literal, 0b01010, 5), REG)),

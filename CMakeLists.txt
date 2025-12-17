@@ -12,6 +12,8 @@ set(SOURCE_FILES
 		src/8086_text.cpp
 		src/instruction.hpp
 		src/instruction.cpp
+		src/simulator.hpp
+		src/simulator.cpp
 )
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

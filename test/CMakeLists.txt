@@ -7,6 +7,7 @@ set(TEST_FILES
     ${CMAKE_SOURCE_DIR}/src/instruction-table.hpp
     ${CMAKE_SOURCE_DIR}/src/instruction-table.cpp
     src/test_nasm_decoder.cpp
+    src/test_nasm_simulator.cpp
 )
 
 add_executable(8086emu_test ${TEST_FILES})

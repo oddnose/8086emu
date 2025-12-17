@@ -12,35 +12,36 @@
 #include <vector>
 #include "instruction-table.hpp"
 #include "instruction.hpp"
+#include "memory.hpp"
 
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
-const std::string reg_names_8bit[] = { 
-  "al", 
-  "cl", 
-  "dl", 
-  "bl",
-  "ah", 
-  "ch", 
-  "dh", 
-  "bh"
+const enum Register reg_names_8bit[] = { 
+	Register::Al,
+	Register::Cl,
+	Register::Dl,
+	Register::Bl,
+	Register::Ah,
+	Register::Ch,
+	Register::Dh,
+	Register::Bh
 };
-const std::string reg_names_16bit[] = { 
-  "ax", // ah and al
-  "cx", // ch and cl
-  "dx", // dh and dl
-  "bx", // bh and bl
-  "sp", // stack pointer
-  "bp", // base pointer
-  "si", // source index
-  "di" // des index
+const enum Register reg_names_16bit[] = { 
+	Register::Ax,
+	Register::Cx,
+	Register::Dx,
+	Register::Bx,
+	Register::Sp,
+	Register::Bp,
+	Register::Si,
+	Register::Di
 };
 
-const std::string seg_reg_names[] = { 
-  "es", 
-  "cs", 
-  "ss", 
-  "ds"
+const enum Register seg_reg_names[] = { 
+	Register::Es,
+	Register::Cs,
+	Register::Ss,
+	Register::Ds
 };
 
 const std::string rm_field_encodings[] = {
@@ -97,7 +98,6 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					mod = value;
 					break;
 				case Instruction_bits_usage::	Reg: {
-					std::string reg = wide ? reg_names_16bit[value] : reg_names_8bit[value];
 					reg_operand.type = Operand_type::Register;
 					reg_operand.reg = wide ? reg_names_16bit[value] : reg_names_8bit[value];
 					break;
@@ -236,7 +236,7 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 					break;
 				case Instruction_bits_usage::Imp_Accumulator: {
 					byte_read = false;
-					std::string acc = wide ? reg_names_16bit[0] : reg_names_8bit[0]; //accumulator used
+					enum Register acc = wide ? reg_names_16bit[0] : reg_names_8bit[0]; //accumulator used
 					if (reg_operand.type != Operand_type::No_op_type) {
 						rm_operand.type = Operand_type::Register;
 						rm_operand.reg = acc;
@@ -277,10 +277,10 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 						std::optional<Instruction> instruction = decode_instruction(data, offset, enc);
 						if (instruction.has_value()) {
 							if (instruction.value().operands[0].type == Operand_type::Memory || instruction.value().operands[0].type == Operand_type::Direct_address) {
-								instruction.value().operands[0].prefix = reg_operand.reg + ":";
+								instruction.value().operands[0].prefix = get_register_name(reg_operand.reg) + ":";
 							}
 							else if (instruction.value().operands[1].type == Operand_type::Memory || instruction.value().operands[1].type == Operand_type::Direct_address) {
-								instruction.value().operands[1].prefix = reg_operand.reg + ":";
+								instruction.value().operands[1].prefix = get_register_name(reg_operand.reg) + ":";
 							}
 							else {
 								std::cerr << "No memory operands event though using segment prefix" << std::endl;

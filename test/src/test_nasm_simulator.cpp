@@ -1,0 +1,51 @@
+#include <gtest/gtest.h>
+#include "decoder.h"
+#include "simulator.hpp"
+
+TEST(SimulatorTest, test_listing_0043)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0043_immediate_movs");
+	struct Memory memory = simulate(instructions);
+
+	EXPECT_EQ(memory.registers[Register::Ax], 1);
+	EXPECT_EQ(memory.registers[Register::Bx], 2);
+	EXPECT_EQ(memory.registers[Register::Cx], 3);
+	EXPECT_EQ(memory.registers[Register::Dx], 4);
+	EXPECT_EQ(memory.registers[Register::Sp], 5);
+	EXPECT_EQ(memory.registers[Register::Bp], 6);
+	EXPECT_EQ(memory.registers[Register::Si], 7);
+	EXPECT_EQ(memory.registers[Register::Di], 8);
+}
+
+TEST(SimulatorTest, test_listing_0044)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0044_register_movs_execution");
+	struct Memory memory = simulate(instructions);
+
+	EXPECT_EQ(memory.registers[Register::Ax], 4);
+	EXPECT_EQ(memory.registers[Register::Bx], 3);
+	EXPECT_EQ(memory.registers[Register::Cx], 2);
+	EXPECT_EQ(memory.registers[Register::Dx], 1);
+	EXPECT_EQ(memory.registers[Register::Sp], 1);
+	EXPECT_EQ(memory.registers[Register::Bp], 2);
+	EXPECT_EQ(memory.registers[Register::Si], 3);
+	EXPECT_EQ(memory.registers[Register::Di], 4);
+}
+
+TEST(SimulatorTest, test_listing_0045)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0045_challenge_register_movs");
+	struct Memory memory = simulate(instructions);
+
+	EXPECT_EQ(memory.registers[Register::Ax], 17425);
+	EXPECT_EQ(memory.registers[Register::Bx], 13124);
+	EXPECT_EQ(memory.registers[Register::Cx], 26231);
+	EXPECT_EQ(memory.registers[Register::Dx], 30600);
+	EXPECT_EQ(memory.registers[Register::Sp], 17425);
+	EXPECT_EQ(memory.registers[Register::Bp], 13124);
+	EXPECT_EQ(memory.registers[Register::Si], 26231);
+	EXPECT_EQ(memory.registers[Register::Di], 30600);
+	EXPECT_EQ(memory.registers[Register::Es], 26231);
+	EXPECT_EQ(memory.registers[Register::Ss], 17425);
+	EXPECT_EQ(memory.registers[Register::Ds], 13124);
+}

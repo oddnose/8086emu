@@ -8,7 +8,7 @@ std::string Operand::to_string() {
 	case No_op_type:
 		return "";
 	case Register:
-		return reg;
+		return get_register_name(reg);
 	case Memory:
 		if (displacement == 0) {
 			return prefix + "[" + address + "]";
@@ -179,3 +179,32 @@ std::string get_instruction_name(Instruction_type type) {
 	std::cerr << "Get text not supported for instruction type" << std::endl;
 	std::exit(1);
 }
+
+std::string get_register_name(enum Register type) {
+	switch (type) {
+		case Ax: return "ax";
+		case Cx: return "cx";
+		case Dx: return "dx";
+		case Bx: return "bx";
+		case Sp: return "sp";
+		case Bp: return "bp";
+		case Si: return "si";
+		case Di: return "di";
+		case Al: return "al";
+		case Cl: return "cl";
+		case Dl: return "dl";
+		case Bl: return "bl";
+		case Ah: return "ah";
+		case Ch: return "ch";
+		case Dh: return "dh";
+		case Bh: return "bh";
+		case Es: return "es";
+		case Cs: return "cs";
+		case Ss: return "ss";
+		case Ds: return "ds";
+	}
+	std::cerr << "Get text not supported for register type" << std::endl;
+	std::exit(1);
+}
+
+

@@ -13,11 +13,40 @@ enum Operand_type {
 };
 enum Operand_size { Byte, Word };
 
+enum Register {
+	Ax,
+	Cx,
+	Dx,
+	Bx,
+	Sp, // stack pointer
+	Bp, // base pointer
+	Si, // source index
+	Di, // des index
+
+	//Low registers
+	Al,
+	Cl,
+	Dl,
+	Bl,
+
+	//High registers
+	Ah,
+	Ch,
+	Dh,
+	Bh,
+
+	//Segment registers
+	Es,
+	Cs,
+	Ss,
+	Ds
+};
+
 struct Operand {
   Operand_type type = No_op_type;
   std::string prefix;
   // TODO: use union if possible
-  std::string reg;
+  enum Register reg;
   int16_t displacement = 0;
   int16_t immediate = 0;
   std::string address;
@@ -44,3 +73,4 @@ struct Instruction {
 };
 
 std::string get_instruction_name(Instruction_type type);
+std::string get_register_name(enum Register type);
