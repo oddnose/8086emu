@@ -1,4 +1,5 @@
 #include "simulator.hpp"
+#include "instruction-table.hpp"
 #include "instruction.hpp"
 #include <iostream>
 #include <sstream>
@@ -94,25 +95,44 @@ void write(Operand operand, struct Memory *memory, uint16_t value) {
   throw std::runtime_error("Unknown operand type");
 }
 
-struct Memory simulate(std::vector<Instruction> instructions) {
+struct Memory simulate(std::vector<Instruction> instructions) 
+{
+
+	std::map<int, Instruction> ip_lookup;
+
+	for (Instruction instruction : instructions) {
+		ip_lookup[instruction.instruction_pointer] = instruction;
+	}
+
   struct Memory memory;
 
-  for (Instruction instruction : instructions) {
+	Instruction first_instruction = instructions.at(0);
+	Instruction last_instruction = instructions.at(instructions.size() - 1);
+
+	memory.instruction_pointer = first_instruction.instruction_pointer;
+	int end_ip = last_instruction.instruction_pointer + last_instruction.processed_bytes.size();
+
+  while (memory.instruction_pointer < end_ip) {
+		Instruction instruction = ip_lookup[memory.instruction_pointer];
+		memory.instruction_pointer += instruction.processed_bytes.size();
     std::ostringstream output;
     output << instruction.to_string() << " ; ";
-		uint16_t src_value = read(instruction.operands[1], &memory);
-		uint16_t dest_value = read(instruction.operands[0], &memory);
 
 		bool z_flag = false;
 		bool s_flag = false;
+
     switch (instruction.name) {
 			case Mov: {
+				uint16_t src_value = read(instruction.operands[1], &memory);
+				uint16_t dest_value = read(instruction.operands[0], &memory);
 				write(instruction.operands[0], &memory, src_value);
 				output << instruction.operands[0].to_string() << ": ";
 				output << "0x" << std::hex << dest_value << "->0x" << std::hex << src_value;
 				break;
 			}
 			case Sub: {
+				uint16_t src_value = read(instruction.operands[1], &memory);
+				uint16_t dest_value = read(instruction.operands[0], &memory);
 				uint16_t result = dest_value - src_value;
 				write(instruction.operands[0], &memory, result);
 				output << instruction.operands[0].to_string() << ": ";
@@ -128,6 +148,8 @@ struct Memory simulate(std::vector<Instruction> instructions) {
 				break;
 			}
 			case Cmp: {
+				uint16_t src_value = read(instruction.operands[1], &memory);
+				uint16_t dest_value = read(instruction.operands[0], &memory);
 				uint16_t result = dest_value - src_value;
 				output << " Result" << result;
 				if ((result & 0x8000) > 0) {
@@ -141,13 +163,22 @@ struct Memory simulate(std::vector<Instruction> instructions) {
 				break;
 			}
 			case Add: {
+				uint16_t src_value = read(instruction.operands[1], &memory);
+				uint16_t dest_value = read(instruction.operands[0], &memory);
 				uint16_t result = dest_value + src_value;
 				write(instruction.operands[0], &memory, result);
 				output << instruction.operands[0].to_string() << ": ";
 				output << "0x" << std::hex << dest_value << "->0x" << std::hex << result;
 				break;
 			}
+			case Jne_Jnz: {
+				if (!memory.z_flag) {
+					memory.instruction_pointer += instruction.operands[0].displacement;
+				}
+				break;
+			}
 		}
+
 		memory.s_flag = s_flag;
 		memory.z_flag = z_flag;
     std::cout << output.str() << std::endl;

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "decoder.h"
+#include "instruction.hpp"
 #include "simulator.hpp"
 
 TEST(SimulatorTest, test_listing_0043)
@@ -60,4 +61,23 @@ TEST(SimulatorTest, test_listing_0046)
 	EXPECT_EQ(memory.s_flag, false);
 	EXPECT_EQ(memory.z_flag, true);
 
+}
+
+TEST(SimulatorTest, test_listing_0048)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0048_ip_register");
+	struct Memory memory = simulate(instructions);
+	EXPECT_EQ(memory.registers[Register::Bx], 2000);
+	EXPECT_EQ(memory.registers[Register::Cx], 64736);
+	EXPECT_EQ(memory.s_flag, true);
+	EXPECT_EQ(memory.instruction_pointer, 14);
+
+}
+
+TEST(SimulatorTest, test_listing_0049)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0049_conditional_jumps");
+	struct Memory memory = simulate(instructions);
+	EXPECT_EQ(memory.registers[Register::Bx], 1030);
+	EXPECT_EQ(memory.instruction_pointer, 14);
 }
