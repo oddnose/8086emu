@@ -42,14 +42,26 @@ enum Register {
 	Ds
 };
 
+enum Rm_field_encodings {
+	Bx_si_rm,
+	Bx_di_rm,
+	Bp_si_rm,
+	Bp_di_rm,
+	Si_rm,
+	Di_rm,
+	Bp_rm,
+	Bx_rm,
+};
+
 struct Operand {
   Operand_type type = No_op_type;
   std::string prefix;
+	Operand_size size;
   // TODO: use union if possible
   enum Register reg;
   int16_t displacement = 0;
   int16_t immediate = 0;
-  std::string address;
+  Rm_field_encodings address;
   size_t rel_size = 2;
 
 	std::string to_string();
@@ -74,3 +86,4 @@ struct Instruction {
 
 std::string get_instruction_name(Instruction_type type);
 std::string get_register_name(enum Register type);
+std::string get_rm_encoding_name(enum Rm_field_encodings encoding);

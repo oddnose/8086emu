@@ -11,12 +11,12 @@ std::string Operand::to_string() {
 		return get_register_name(reg);
 	case Memory:
 		if (displacement == 0) {
-			return prefix + "[" + address + "]";
+			return prefix + "[" + get_rm_encoding_name(address) + "]";
 		} else if (displacement > 0) {
-			return prefix + "[" + address + " + " + std::to_string(displacement) +
+			return prefix + "[" + get_rm_encoding_name(address) + " + " + std::to_string(displacement) +
 						 "]";
 		} else {
-			return prefix + "[" + address + " - " + std::to_string(-displacement) +
+			return prefix + "[" + get_rm_encoding_name(address) + " - " + std::to_string(-displacement) +
 						 "]";
 		}
 	case Immediate:
@@ -180,7 +180,8 @@ std::string get_instruction_name(Instruction_type type) {
 	std::exit(1);
 }
 
-std::string get_register_name(enum Register type) {
+std::string get_register_name(enum Register type) 
+{
 	switch (type) {
 		case Ax: return "ax";
 		case Cx: return "cx";
@@ -204,6 +205,22 @@ std::string get_register_name(enum Register type) {
 		case Ds: return "ds";
 	}
 	std::cerr << "Get text not supported for register type" << std::endl;
+	std::exit(1);
+}
+
+std::string get_rm_encoding_name(enum Rm_field_encodings encoding)
+{
+	switch (encoding) {
+		case Bx_si_rm: return "bx + si";
+		case Bx_di_rm: return "bx + di";
+		case Bp_si_rm: return "bp + si";
+		case Bp_di_rm: return "bp + di";
+		case Si_rm: return "si";
+		case Di_rm: return "di";
+		case Bp_rm: return "bp";
+		case Bx_rm: return "bx";
+	}
+	std::cerr << "Get text not supported for rm encoding" << std::endl;
 	std::exit(1);
 }
 

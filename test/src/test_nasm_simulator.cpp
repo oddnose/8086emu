@@ -81,3 +81,38 @@ TEST(SimulatorTest, test_listing_0049)
 	EXPECT_EQ(memory.registers[Register::Bx], 1030);
 	EXPECT_EQ(memory.instruction_pointer, 14);
 }
+
+TEST(SimulatorTest, test_listing_0051)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0051_memory_mov");
+	struct Memory memory = simulate(instructions);
+	EXPECT_EQ(memory.registers[Register::Bx], 1);
+	EXPECT_EQ(memory.registers[Register::Cx], 2);
+	EXPECT_EQ(memory.registers[Register::Dx], 10);
+	EXPECT_EQ(memory.registers[Register::Bp], 4);
+	EXPECT_EQ(memory.instruction_pointer, 48);
+}
+
+TEST(SimulatorTest, test_listing_0052)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0052_memory_add_loop");
+	struct Memory memory = simulate(instructions);
+	EXPECT_EQ(memory.registers[Register::Bx], 6);
+	EXPECT_EQ(memory.registers[Register::Cx], 4);
+	EXPECT_EQ(memory.registers[Register::Dx], 6);
+	EXPECT_EQ(memory.registers[Register::Bp], 1000);
+	EXPECT_EQ(memory.registers[Register::Si], 6);
+	EXPECT_EQ(memory.instruction_pointer, 35);
+	EXPECT_EQ(memory.z_flag, true);
+}
+
+TEST(SimulatorTest, test_listing_0053)
+{
+	std::vector<Instruction> instructions = decode_asm_file("res/listing_0053_add_loop_challenge");
+	struct Memory memory = simulate(instructions);
+	EXPECT_EQ(memory.registers[Register::Bx], 6);
+	EXPECT_EQ(memory.registers[Register::Dx], 6);
+	EXPECT_EQ(memory.registers[Register::Bp], 998);
+	EXPECT_EQ(memory.instruction_pointer, 33);
+	EXPECT_EQ(memory.z_flag, true);
+}

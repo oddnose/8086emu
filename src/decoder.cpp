@@ -12,7 +12,6 @@
 #include <vector>
 #include "instruction-table.hpp"
 #include "instruction.hpp"
-#include "memory.hpp"
 
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
@@ -44,16 +43,16 @@ const enum Register seg_reg_names[] = {
 	Register::Ds
 };
 
-const std::string rm_field_encodings[] = {
-  "bx + si",
-  "bx + di",
-  "bp + si",
-  "bp + di",
-  "si",
-  "di",
-  "bp", //not used when mod 00
-  "bx"
-}; 
+const enum Rm_field_encodings rm_field_encodings[] = {
+	Bx_si_rm,
+	Bx_di_rm,
+	Bp_si_rm,
+	Bp_di_rm,
+	Si_rm,
+	Di_rm,
+	Bp_rm,
+	Bx_rm,
+};
 
 enum Displacement {
 	None,
@@ -108,10 +107,12 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 							if (value == 0b110) { //direct address
 								rm_operand.type = Operand_type::Direct_address;
 								displacement_type = Displacement::Sixteen_bit;
+								rm_operand.size = wide ? Operand_size::Word : Operand_size::Byte;
 							}
 							else {
 								rm_operand.type = Operand_type::Memory;
 								rm_operand.address = rm_field_encodings[value];
+								rm_operand.size = wide ? Operand_size::Word : Operand_size::Byte;
 							}
 							break;
 						}
@@ -119,11 +120,13 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 							displacement_type = Displacement::Eight_bit;
 							rm_operand.type = Operand_type::Memory;
 							rm_operand.address = rm_field_encodings[value];
+							rm_operand.size = wide ? Operand_size::Word : Operand_size::Byte;
 							break;
 						case 0b10: {// Memory Mode, 16-bit displacement follows
 							displacement_type = Displacement::Sixteen_bit;
 							rm_operand.type = Operand_type::Memory;
 							rm_operand.address = rm_field_encodings[value];
+							rm_operand.size = wide ? Operand_size::Word : Operand_size::Byte;
 							break;
 						}
 						case 0b11: // Register Mode (no displacement)
@@ -170,6 +173,7 @@ std::optional<Instruction> decode_instruction(std::vector<unsigned char> data, s
 				case Instruction_bits_usage::Addr_lo:
 					rm_operand.type = Operand_type::Direct_address;
 					rm_operand.displacement = wide ? static_cast<int16_t>(value) : static_cast<int8_t>(value);
+					rm_operand.size = wide ? Operand_size::Word : Operand_size::Byte;
 
 					break;
 				case Instruction_bits_usage::Addr_hi:

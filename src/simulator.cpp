@@ -5,36 +5,85 @@
 #include <sstream>
 #include <stdexcept>
 
-uint16_t lowRegMask = 0x00FF;
-uint16_t highRegMask = 0xFF00;
+uint16_t read_register(enum Register reg, struct Memory *memory) 
+{
+	switch (reg) {
+		case Register::Al:
+			return memory->registers[Register::Ax] & 0x00FF;
+		case Register::Ah:
+			return memory->registers[Register::Ax] >> 8;
+		case Register::Bl:
+			return memory->registers[Register::Bx] & 0x00FF;
+		case Register::Bh:
+			return memory->registers[Register::Bx] >> 8;
+		case Register::Cl:
+			return memory->registers[Register::Cx] & 0x00FF;
+		case Register::Ch:
+			return memory->registers[Register::Cx] >> 8;
+		case Register::Dl:
+			return memory->registers[Register::Dx] & 0x00FF;
+		case Register::Dh:
+			return memory->registers[Register::Dx] >> 8;
+		default:
+			return memory->registers[reg];
+	}
+}
 
-uint16_t read(Operand operand, struct Memory *memory) {
+uint16_t read(Operand operand, struct Memory *memory) 
+{
   switch (operand.type) {
   case Register:
-		switch (operand.reg) {
-			case Register::Al:
-				return memory->registers[Register::Ax] & 0x00FF;
-			case Register::Ah:
-				return memory->registers[Register::Ax] >> 8;
-			case Register::Bl:
-				return memory->registers[Register::Bx] & 0x00FF;
-			case Register::Bh:
-				return memory->registers[Register::Bx] >> 8;
-			case Register::Cl:
-				return memory->registers[Register::Cx] & 0x00FF;
-			case Register::Ch:
-				return memory->registers[Register::Cx] >> 8;
-			case Register::Dl:
-				return memory->registers[Register::Dx] & 0x00FF;
-			case Register::Dh:
-				return memory->registers[Register::Dx] >> 8;
-			default:
-				return memory->registers[operand.reg];
+		return read_register(operand.reg, memory);
+  case Memory: {
+		uint16_t address = 0;
+		switch (operand.address) {
+			case Bx_si_rm:
+				address = read_register(Register::Bx, memory) + read_register(Register::Si, memory) + operand.displacement;
+				break;
+			case Bx_di_rm:
+				address = read_register(Register::Bx, memory) + read_register(Register::Di, memory) + operand.displacement;
+				break;
+			case Bp_si_rm:
+				address = read_register(Register::Bp, memory) + read_register(Register::Si, memory) + operand.displacement;
+				break;
+			case Bp_di_rm:
+				address = read_register(Register::Bp, memory) + read_register(Register::Di, memory) + operand.displacement;
+				break;
+			case Si_rm:
+				address = read_register(Register::Si, memory) + operand.displacement;
+				break;
+			case Di_rm:
+				address = read_register(Register::Di, memory) + operand.displacement;
+				break;
+			case Bp_rm:
+				address = read_register(Register::Bp, memory) + operand.displacement;
+				break;
+			case Bx_rm:
+				address = read_register(Register::Bx, memory) + operand.displacement;
+				break;
 		}
-  case Memory:
+		if (operand.size == Operand_size::Word) {
+			uint16_t result = 0;
+			result |= (memory->memory_map.at(address));
+			result |= (memory->memory_map.at(address + 1) << 8);
+			return result;
+		}
+		else {
+			return memory->memory_map.at(address);
+		}
+	}
   case Immediate:
     return operand.immediate;
   case Direct_address:
+		if (operand.size == Operand_size::Word) {
+			uint16_t result = 0;
+			result |= (memory->memory_map.at(operand.displacement));
+			result |= (memory->memory_map.at(operand.displacement + 1) << 8);
+			return result;
+		} 
+		else {
+			return memory->memory_map.at(operand.address);
+		}
   case Relative_offset:
   case No_op_type:
     throw std::runtime_error("Operand type not set");
@@ -84,10 +133,55 @@ void write(Operand operand, struct Memory *memory, uint16_t value) {
 				break;
 		}
 		return;
-  case Memory:
+  case Memory: {
+		uint16_t address = 0;
+		switch (operand.address) {
+			case Bx_si_rm:
+				address = read_register(Register::Bx, memory) + read_register(Register::Si, memory) + operand.displacement;
+				break;
+			case Bx_di_rm:
+				address = read_register(Register::Bx, memory) + read_register(Register::Di, memory) + operand.displacement;
+				break;
+			case Bp_si_rm:
+				address = read_register(Register::Bp, memory) + read_register(Register::Si, memory) + operand.displacement;
+				break;
+			case Bp_di_rm:
+				address = read_register(Register::Bp, memory) + read_register(Register::Di, memory) + operand.displacement;
+				break;
+			case Si_rm:
+				address = read_register(Register::Si, memory) + operand.displacement;
+				break;
+			case Di_rm:
+				address = read_register(Register::Di, memory) + operand.displacement;
+				break;
+			case Bp_rm:
+				address = read_register(Register::Bp, memory) + operand.displacement;
+				break;
+			case Bx_rm:
+				address = read_register(Register::Bx, memory) + operand.displacement;
+				break;
+		}
+		if (operand.size == Operand_size::Word) {
+			memory->memory_map[address] = (value & 0x00FF);
+			memory->memory_map[address + 1] = (value >> 8);
+		}
+		else {
+			memory->memory_map[address] = value;
+		}
+		return;
+	}
   case Immediate:
     throw std::runtime_error("Not possible to write to immediate");
   case Direct_address:
+		if (operand.size == Operand_size::Word) {
+			memory->memory_map[operand.displacement] = (value & 0x00FF);
+			memory->memory_map[operand.displacement + 1] = (value >> 8);
+		} 
+		else {
+			memory->memory_map[operand.displacement] = value;
+
+		}
+		return;
   case Relative_offset:
   case No_op_type:
     throw std::runtime_error("Operand type not set");
@@ -174,6 +268,9 @@ struct Memory simulate(std::vector<Instruction> instructions)
 			case Jne_Jnz: {
 				if (!memory.z_flag) {
 					memory.instruction_pointer += instruction.operands[0].displacement;
+				}
+				else {
+					z_flag = true;
 				}
 				break;
 			}
