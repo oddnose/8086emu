@@ -3,6 +3,7 @@
 #include "simulator.hpp"
 #include <cstring>
 #include <iostream>
+#include <stdio.h>
 
 
 int main(int arg_count, char **args)
@@ -11,7 +12,7 @@ int main(int arg_count, char **args)
 		std::cerr << "Usage: " << args[0] << " <8086 binary file>" << std::endl;
 		std::cerr << "Flags:" << std::endl;
 		std::cerr << "-d: print debug info" << std::endl;
-		std::cerr << "-s: run simulation and print out memory state after program" << std::endl;
+		std::cerr << "-s: run simulation and print out memory state after program. Also dumps all memory to memory.data" << std::endl;
 		std::exit(1);
 	}
 
@@ -47,7 +48,11 @@ int main(int arg_count, char **args)
 
 	if (run_simulate) {
 		std::cout << "Simulation:" << std::endl;
-		simulate(instructions);
+		struct Memory memory = simulate(instructions);
+		FILE *file = fopen("memory.data", "wb");
+		std::fwrite(memory.memory_map.data(), sizeof memory.memory_map, 1, file);
+		fclose(file);
+
 	}
 
 }
