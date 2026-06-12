@@ -1,10 +1,13 @@
 #include "simulator.hpp"
 #include "instruction-table.hpp"
 #include "instruction.hpp"
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
+// ----------------------------------------------------------------
 uint16_t read_register(enum Register reg, struct Memory *memory) {
   switch (reg) {
   case Register::Al:
@@ -28,6 +31,7 @@ uint16_t read_register(enum Register reg, struct Memory *memory) {
   }
 }
 
+// ----------------------------------------------------------------
 uint16_t read(Operand operand, struct Memory *memory) {
   switch (operand.type) {
   case Register:
@@ -91,6 +95,7 @@ uint16_t read(Operand operand, struct Memory *memory) {
   throw std::runtime_error("Unknown operand type");
 }
 
+// ----------------------------------------------------------------
 void write(Operand operand, struct Memory *memory, uint16_t value) {
 
   switch (operand.type) {
@@ -190,6 +195,72 @@ void write(Operand operand, struct Memory *memory, uint16_t value) {
   throw std::runtime_error("Unknown operand type");
 }
 
+// ----------------------------------------------------------------
+// Calcules Effective Address Calculation Time based on table 2-20 in manual
+uint16_t calculate_ea(Operand operand) 
+{
+	switch (operand.address) {
+	case Bx_si_rm: break;
+	case Bx_di_rm: break;
+	case Bp_si_rm: break;
+	case Bp_di_rm: break;
+	case Si_rm: 
+	case Di_rm: 
+	case Bp_rm: 
+	case Bx_rm: {
+		if (operand.displacement > 0) {
+			return 9;
+		}
+		return 5;
+	}
+	}
+	return 0;
+}
+
+// ----------------------------------------------------------------
+// Calculates estimated cycles based on table 2-21 in manual
+uint16_t get_estimated_cycles(Instruction instruction)
+{
+	switch (instruction.name) {
+		case Mov: {
+			if (instruction.operands[0].type == Register && instruction.operands[1].type == Register) {
+				return 2;
+			}
+			if (instruction.operands[0].type == Register && instruction.operands[1].type == Direct_address) {
+				// 8 + EA
+				return 8 + 6;
+			}
+			if (instruction.operands[0].type == Register && instruction.operands[1].type == Memory) {
+				// 8 + EA
+				uint16_t ea = calculate_ea(instruction.operands[1]);
+				return 8 + ea;
+			}
+			if (instruction.operands[0].type == Register && instruction.operands[1].type == Immediate) {
+				return 4;
+			}
+			if (instruction.operands[0].type == Memory && instruction.operands[1].type == Register) {
+				uint16_t ea = calculate_ea(instruction.operands[0]);
+				return 9 + ea;
+			}
+		}
+		case Add: {
+			if (instruction.operands[0].type == Register && instruction.operands[1].type == Register) {
+				return 3;
+			}
+			if (instruction.operands[0].type == Memory && instruction.operands[1].type == Register) {
+				uint16_t ea = calculate_ea(instruction.operands[0]);
+				return 16 + ea;
+			}
+			if (instruction.operands[0].type == Register && instruction.operands[1].type == Immediate) {
+				return 4;
+			}
+
+		}
+	}
+	return 0;
+}
+
+// ----------------------------------------------------------------
 struct Memory simulate(std::vector<Instruction> instructions) {
 
   std::map<int, Instruction> ip_lookup;
@@ -208,6 +279,7 @@ struct Memory simulate(std::vector<Instruction> instructions) {
   int end_ip = last_instruction.instruction_pointer +
                last_instruction.processed_bytes.size();
 
+	uint16_t total_cycles = 0;
   while (memory.instruction_pointer < end_ip) {
     Instruction instruction = ip_lookup[memory.instruction_pointer];
     memory.instruction_pointer += instruction.processed_bytes.size();
@@ -277,6 +349,10 @@ struct Memory simulate(std::vector<Instruction> instructions) {
       break;
     }
     }
+
+		uint16_t cycles = get_estimated_cycles(instruction);
+		total_cycles += cycles;
+		output << " | Clocks: +" << std::to_string(cycles) << " = " << std::to_string(total_cycles);
 
     memory.s_flag = s_flag;
     memory.z_flag = z_flag;
